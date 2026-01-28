@@ -105,6 +105,26 @@
 
 - **Padrão**: 6px (botões, dropdown, user button)
 
+## CSS no Astro
+
+### Regras de Estilização
+
+- **CSS Scoped**: Use apenas para estilos específicos de componente estático
+- **CSS Global**: Use `:global()` para elementos criados dinamicamente via JavaScript
+- **Elementos Dinâmicos**: Sempre usar `:global(.classe)` para estilos que afetam conteúdo gerado por JS
+
+```astro
+<!-- ❌ Não funciona com elementos dinâmicos -->
+<style>
+  .dynamic-element { color: red; }
+</style>
+
+<!-- ✅ Funciona com elementos dinâmicos -->
+<style>
+  :global(.dynamic-element) { color: red; }
+</style>
+```
+
 ## Sombras
 
 - **Dropdown**: `0 4px 12px rgba(0, 0, 0, 0.15)`
