@@ -13,6 +13,7 @@ const troncosRoutes = require('./routes/troncos');
 const chatbotsRoutes = require('./routes/chatbots');
 const numerobotsRoutes = require('./routes/numerobots');
 const contatosRoutes = require('./routes/contatos');
+const searchRoutes = require('./routes/search');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3000;
@@ -32,6 +33,7 @@ app.use('/api/troncos', troncosRoutes);
 app.use('/api/chatbots', chatbotsRoutes);
 app.use('/api/numerobots', numerobotsRoutes);
 app.use('/api/contatos', contatosRoutes);
+app.use('/api/search', searchRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

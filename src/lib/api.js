@@ -38,6 +38,36 @@ export async function fetchApiData(endpoint, options = {}) {
 }
 
 /**
+ * Busca universal em todas as tabelas do sistema
+ * @param {string} query - Termo de busca
+ * @returns {Promise<Array>} Array de resultados agrupados por empresa
+ */
+export async function universalSearch(query) {
+  try {
+    if (!query || query.trim().length < 2) {
+      return [];
+    }
+
+    const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/api/search?q=${encodeURIComponent(query.trim())}`;
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.error('Erro na busca universal:', response.status);
+      return [];
+    }
+    
+    const results = await response.json();
+    return Array.isArray(results) ? results : [];
+    
+  } catch (error) {
+    console.error('Erro ao realizar busca universal:', error);
+    return [];
+  }
+}
+
+/**
  * Busca dados paginados da API
  * @param {string} endpoint - Endpoint da API
  * @param {number} page - Página atual
