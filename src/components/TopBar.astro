@@ -1,0 +1,189 @@
+---
+// TopBar.astro
+---
+
+<div class="topbar">
+  <div class="logo">
+    <h1>Invent v.2</h1>
+  </div>
+  
+  <nav class="nav-buttons">
+    <a href="/maquinas" class="nav-btn">Máquinas</a>
+    <a href="/empresas" class="nav-btn">Empresas</a>
+    <a href="/pessoas" class="nav-btn">Pessoas</a>
+    <a href="/chatbots" class="nav-btn">Chatbots</a>
+  </nav>
+  
+  <div class="user-menu">
+    <button class="user-button" id="userButton">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
+        <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
+      </svg>
+    </button>
+    
+    <div class="dropdown" id="dropdown">
+      <a href="#" class="dropdown-item">Mais informações</a>
+      <a href="#" class="dropdown-item">Sair</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .topbar {
+    background-color: #183054;
+    height: 90px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .logo h1 {
+    font-family: 'Roboto Slab', serif;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    font-size: 36px;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  .nav-buttons {
+    display: flex;
+    gap: 12px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .nav-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 15px;
+    font-family: 'Arimo', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-decoration: none;
+    display: inline-block;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  .nav-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .nav-btn:active {
+    transform: scale(0.95);
+  }
+
+  .user-menu {
+    position: relative;
+  }
+
+  .user-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+
+  .user-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 160px;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 1000;
+    margin-top: 12px;
+  }
+
+  .dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 12px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    transform: rotate(45deg);
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+
+  .dropdown-item {
+    display: block;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+    transition: background-color 0.2s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f5f5f5;
+  }
+
+  .dropdown-item:first-child {
+    border-radius: 6px 6px 0 0;
+  }
+
+  .dropdown-item:last-child {
+    border-radius: 0 0 6px 6px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const userButton = document.getElementById('userButton');
+    const dropdown = document.getElementById('dropdown');
+
+    userButton?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown?.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+      dropdown?.classList.remove('show');
+    });
+
+    dropdown?.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  });
+</script>

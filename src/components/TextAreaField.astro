@@ -1,0 +1,38 @@
+---
+interface Props {
+  label: string;
+  name: string;
+  required?: boolean;
+  value?: string;
+  rows?: number;
+}
+
+const { label, name, required = false, value = "", rows = 3 } = Astro.props;
+---
+
+<div class="form-group">
+  <label for={name}>{label} {required && "*"}</label>
+  <textarea 
+    id={name} 
+    name={name} 
+    required={required}
+    rows={rows}
+  >{value}</textarea>
+</div>
+
+<style>
+  textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Arimo', sans-serif;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: #183054;
+  }
+</style>

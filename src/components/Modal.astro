@@ -1,0 +1,151 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  formId: string;
+}
+
+const { id, title, formId } = Astro.props;
+---
+
+<div id={id} class="modal">
+  <div class="modal-content">
+    <button class="modal-close" data-close-modal={id}>&times;</button>
+    <h2 class="modal-title">{title}</h2>
+    
+    <form id={formId}>
+      <slot />
+      
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" data-close-modal={id}>Cancelar</button>
+        <button type="submit" class="btn-save">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-title {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  :global(.form-group) {
+    margin-bottom: 16px;
+  }
+
+  :global(.form-group label) {
+    display: block;
+    margin-bottom: 4px;
+    color: #333;
+    font-weight: 600;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  :global(.form-group input) {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Arimo', sans-serif;
+    box-sizing: border-box;
+  }
+
+  :global(.form-group input:focus) {
+    outline: none;
+    border-color: #183054;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  .btn-cancel {
+    background: #f5f5f5;
+    color: #666;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .btn-save {
+    background: #183054;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .btn-save:hover {
+    background: #1f3d66;
+  }
+</style>

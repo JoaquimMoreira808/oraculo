@@ -1,0 +1,68 @@
+---
+import TopBar from '../components/TopBar.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<TopBar />
+	<main class="search-container">
+		<div class="search-wrapper">
+			<h1 class="search-title">Pergunte ao oráculo</h1>
+			<input 
+				type="text" 
+				placeholder="Pesquisar..." 
+				class="search-input"
+			/>
+		</div>
+	</main>
+</Layout>
+
+<style>
+	.search-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: calc(100vh - 80px);
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	.search-wrapper {
+		width: 100%;
+		max-width: 600px;
+		transform: translateY(-60%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.search-title {
+		font-size: 32px;
+		margin: 0 0 24px 0;
+		color: #333;
+		font-weight: 400;
+		font-family: 'Roboto Mono', monospace;
+		width: 100%;
+		text-align: center;
+	}
+
+	.search-input {
+		width: 100%;
+		padding: 16px 24px;
+		font-size: 18px;
+		border: 2px solid #ddd;
+		border-radius: 50px;
+		outline: none;
+		transition: border-color 0.3s ease;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	}
+
+	.search-input:focus {
+		border-color: #007acc;
+		box-shadow: 0 2px 15px rgba(0, 122, 204, 0.2);
+	}
+
+	.search-input::placeholder {
+		color: #999;
+	}
+</style>

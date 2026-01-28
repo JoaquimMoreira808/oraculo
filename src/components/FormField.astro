@@ -1,0 +1,22 @@
+---
+interface Props {
+  label: string;
+  name: string;
+  type?: string;
+  required?: boolean;
+  value?: string;
+}
+
+const { label, name, type = "text", required = false, value = "" } = Astro.props;
+---
+
+<div class="form-group">
+  <label for={name}>{label} {required && "*"}</label>
+  <input 
+    type={type} 
+    id={name} 
+    name={name} 
+    required={required}
+    value={value}
+  >
+</div>

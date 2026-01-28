@@ -1,0 +1,40 @@
+---
+interface Props {
+  label: string;
+  name: string;
+  required?: boolean;
+  options: Array<{value: string | number, text: string}>;
+  value?: string | number;
+}
+
+const { label, name, required = false, options, value = "" } = Astro.props;
+---
+
+<div class="form-group">
+  <label for={name}>{label} {required && "*"}</label>
+  <select id={name} name={name} required={required}>
+    <option value="">Selecione...</option>
+    {options.map(option => (
+      <option value={option.value} selected={option.value == value}>
+        {option.text}
+      </option>
+    ))}
+  </select>
+</div>
+
+<style>
+  select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Arimo', sans-serif;
+    box-sizing: border-box;
+    background: white;
+  }
+
+  select:focus {
+    outline: none;
+    border-color: #183054;
+  }
+</style>

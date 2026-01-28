@@ -1,0 +1,32 @@
+---
+interface Props {
+  text: string;
+  id?: string;
+}
+
+const { text, id } = Astro.props;
+---
+
+<button class="add-btn" id={id}>+ {text}</button>
+
+<style>
+  .add-btn {
+    background: #183054;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-family: 'Arimo', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+
+  .add-btn:hover {
+    background: #1f3d66;
+  }
+
+  .add-btn:active {
+    transform: scale(0.95);
+  }
+</style>

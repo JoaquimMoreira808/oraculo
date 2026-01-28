@@ -1,0 +1,140 @@
+---
+interface Props {
+  columns: string[];
+  data: any[];
+  renderActions?: boolean;
+  pagination?: {
+    page?: number;
+    totalPages?: number;
+    total?: number;
+  };
+  entityName?: string;
+}
+
+const { columns, data, renderActions = true, pagination, entityName = 'itens' } = Astro.props;
+---
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        {columns.map(col => <th>{col}</th>)}
+        {renderActions && <th>Ações</th>}
+      </tr>
+    </thead>
+    <tbody>
+      <slot />
+    </tbody>
+  </table>
+  
+  {pagination && (pagination.totalPages > 1 || pagination.total > 0) && (
+    <div class="pagination">
+      {pagination.page > 1 && (
+        <a href={`?page=${pagination.page - 1}`} class="pagination-btn">← Anterior</a>
+      )}
+      
+      <span class="pagination-info">
+        Página {pagination.page || 1} de {pagination.totalPages || 1} ({pagination.total || 0} {entityName})
+      </span>
+      
+      {pagination.page < pagination.totalPages && (
+        <a href={`?page=${pagination.page + 1}`} class="pagination-btn">Próxima →</a>
+      )}
+    </div>
+  )}
+</div>
+
+<style>
+  .table-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: var(--table-animation);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  thead {
+    background: #f8f9fa;
+  }
+
+  th {
+    text-align: center;
+    padding: 16px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  :global(td) {
+    padding: 16px;
+    color: #666;
+    font-size: 14px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+  }
+
+  :global(tbody tr) {
+    background: white;
+  }
+
+  :global(tbody tr:hover) {
+    background: #f8f9fa;
+  }
+
+  :global(.action-buttons) {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    min-height: 50px;
+  }
+
+  .pagination-btn {
+    background: #183054;
+    color: white !important;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    display: inline-block;
+  }
+
+  .pagination-btn:hover {
+    background: #1f3d66;
+    transform: translateY(-1px);
+    color: white !important;
+    text-decoration: none;
+  }
+
+  .pagination-btn:active {
+    transform: translateY(0);
+  }
+
+  .pagination-btn:visited {
+    color: white;
+  }
+
+  .pagination-info {
+    color: #666;
+    font-size: 14px;
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  message: string;
+  warning?: string;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+const { 
+  id, 
+  title, 
+  message, 
+  warning,
+  confirmText = "Confirmar",
+  cancelText = "Cancelar"
+} = Astro.props;
+---
+
+<div id={id} class="modal">
+  <div class="modal-content confirm-modal">
+    <div class="confirm-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#f54257" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3>{title}</h3>
+    {warning && <p class="warning-text">{warning}</p>}
+    <div class="confirm-actions">
+      <button type="button" class="btn-cancel" data-confirm-cancel={id}>{cancelText}</button>
+      <button type="button" class="btn-danger" data-confirm-action={id}>{confirmText}</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    text-align: center;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .confirm-icon {
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 12px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+    font-size: 20px;
+  }
+
+  .warning-text {
+    color: #999;
+    font-weight: 400;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn-cancel {
+    background: #f5f5f5;
+    color: #666;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .btn-danger {
+    background: #f54257;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Arimo', sans-serif;
+    transition: background-color 0.2s;
+  }
+
+  .btn-danger:hover {
+    background: #e03850;
+  }
+</style>

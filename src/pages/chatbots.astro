@@ -1,0 +1,781 @@
+---
+import TopBar from '../components/TopBar.astro';
+import Layout from '../layouts/Layout.astro';
+import DataTable from '../components/DataTable.astro';
+import ViewButton from '../components/ViewButton.astro';
+import EditButton from '../components/EditButton.astro';
+import DeleteButton from '../components/DeleteButton.astro';
+import AddButton from '../components/AddButton.astro';
+import Modal from '../components/Modal.astro';
+import FormField from '../components/FormField.astro';
+import ConfirmModal from '../components/ConfirmModal.astro';
+import SelectField from '../components/SelectField.astro';
+import TextAreaField from '../components/TextAreaField.astro';
+import { fetchPaginatedData, fetchApiData } from '../lib/api.js';
+
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+
+const [chatbotsResult, empresas] = await Promise.all([
+  fetchPaginatedData('chatbots', page, limit),
+  fetchApiData('empresas')
+]);
+
+const { data: chatbots, pagination } = chatbotsResult;
+---
+
+<Layout>
+  <TopBar />
+  <main>
+    <div class="header">
+      <AddButton text="Novo Chatbot" id="addChatbotBtn" />
+    </div>
+    
+    <DataTable 
+      columns={['Empresa', 'Usuário', 'Servidor']} 
+      data={chatbots}
+      pagination={pagination}
+      entityName="chatbots"
+    >
+      {chatbots.map((chatbot) => (
+        <tr>
+          <td>{chatbot.empresa_nome || '-'}</td>
+          <td>{chatbot.login}</td>
+          <td>{chatbot.servidor || '-'}</td>
+          <td>
+            <div class="action-buttons">
+              <ViewButton itemId={chatbot.id} />
+              <EditButton itemId={chatbot.id} />
+              <DeleteButton itemId={chatbot.id} />
+            </div>
+          </td>
+        </tr>
+      ))}
+    </DataTable>
+  </main>
+
+  <Modal id="chatbotModal" title="Novo Chatbot" formId="chatbotForm">
+    <SelectField 
+      label="Empresa" 
+      name="empresa_id" 
+      required 
+      options={empresas.map(e => ({value: e.id, text: e.nome}))}
+    />
+    <FormField label="Servidor" name="servidor" value="omni.trelogic.com.br" required />
+    <FormField label="Usuário" name="login" required />
+    <FormField label="Senha" name="senha" type="password" required />
+    <FormField label="Responsável" name="responsavel" />
+    <FormField label="Email de Contato" name="contato" type="email" />
+    
+    <div class="checkbox-group">
+      <label class="checkbox-label">
+        <input type="checkbox" name="bot_whatsapp" value="T" />
+        WhatsApp
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="bot_facebook" value="T" />
+        Facebook
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="bot_instagram" value="T" />
+        Instagram
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="bot_email" value="T" />
+        Email
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="bot_website" value="T" />
+        Website
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="bot_telegram" value="T" />
+        Telegram
+      </label>
+    </div>
+    
+    <FormField label="Quantidade de Licenças" name="qt_licenca" />
+    <TextAreaField label="Observações" name="obs" />
+  </Modal>
+
+  <ConfirmModal 
+    id="confirmModal" 
+    title="Tem certeza que deseja excluir este chatbot?" 
+    warning="Esse arquivo será perdido pra sempre! (Muito tempo)"
+    confirmText="Excluir"
+  />
+
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-details>&times;</button>
+      <h2 id="modalTitle">Detalhes do Chatbot</h2>
+      
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="detalhes">Detalhes</button>
+        <button class="tab-btn" data-tab="numeros">Números</button>
+      </div>
+
+      <div id="detalhes" class="tab-pane active">
+        <div class="details-stack">
+          <div class="detail-item" id="empresaText"></div>
+          <div class="detail-item" id="servidorText"></div>
+          <div class="detail-item" id="loginText"></div>
+          <div class="detail-item" id="responsavelText"></div>
+          <div class="detail-item" id="contatoText"></div>
+          <div class="detail-item" id="plataformasText"></div>
+          <div class="detail-item" id="licencasText"></div>
+          <div class="detail-item" id="observacoesText"></div>
+        </div>
+      </div>
+
+      <div id="numeros" class="tab-pane">
+        <div class="tab-header">
+          <button class="btn-add" id="addNumero">+ Novo Número</button>
+        </div>
+        <div id="numerosList"></div>
+      </div>
+    </div>
+  </div>
+
+  <Modal id="numeroModal" title="Número" formId="numeroForm">
+    <SelectField 
+      label="Tipo" 
+      name="tipo" 
+      required
+      options={[
+        {value: 'Oficial', text: 'Oficial'},
+        {value: 'QrCode', text: 'QrCode'}
+      ]}
+    />
+    <FormField label="Número" name="numero" required />
+  </Modal>
+</Layout>
+
+<style>
+  main {
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInScale 0.4s ease-out;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+    padding: 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: #f8f9fa;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #183054;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  #modalTitle {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+    font-size: 24px;
+  }
+
+  .details-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .detail-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 6px;
+  }
+
+  .detail-item p {
+    margin: 0;
+    color: #333;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn:hover {
+    color: #183054;
+  }
+
+  .tab-btn.active {
+    color: #183054;
+    border-bottom-color: #183054;
+    font-weight: 600;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  .tab-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .btn-add {
+    background: #183054;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .btn-add:hover {
+    background: #0f1f35;
+  }
+
+  .entity-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  .entity-info h4 {
+    margin: 0 0 4px 0;
+    color: #333;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .entity-info p {
+    margin: 0 0 8px 0;
+    color: #666;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .entity-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .btn-edit, .btn-delete {
+    background: rgba(24, 48, 84, 0.1);
+    color: #183054;
+    border: none;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 34px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-delete {
+    background: rgba(245, 66, 87, 0.1);
+    color: #f54257;
+  }
+
+  .btn-edit:hover {
+    background: rgba(24, 48, 84, 0.2);
+  }
+
+  .btn-delete:hover {
+    background: rgba(245, 66, 87, 0.2);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('chatbotModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const detailsModal = document.getElementById('detailsModal');
+    const addBtn = document.getElementById('addChatbotBtn');
+    const form = document.getElementById('chatbotForm');
+    const modalTitle = modal.querySelector('.modal-title');
+    const saveBtn = modal.querySelector('.btn-save');
+    
+    let isEditing = false;
+    let editingId = null;
+    let deleteId = null;
+    let currentChatbotId = null;
+    let editingNumeroId = null;
+
+    async function refreshTable() {
+      try {
+        const response = await fetch('http://localhost:3000/api/chatbots');
+        const chatbots = await response.json();
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = chatbots.map(chatbot => `
+          <tr>
+            <td>${chatbot.empresa_nome || '-'}</td>
+            <td>${chatbot.login}</td>
+            <td>${chatbot.servidor || '-'}</td>
+            <td>
+              <div class="action-buttons" style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                <button class="view-btn" title="Visualizar" data-item-id="${chatbot.id}" style="background: rgba(24, 48, 84, 0.1); color: #183054; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 30px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+                <button class="edit-btn" title="Editar" data-item-id="${chatbot.id}" style="background: rgba(24, 48, 84, 0.1); color: #183054; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 30px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button class="delete-btn" title="Excluir" data-item-id="${chatbot.id}" style="background: rgba(245, 66, 87, 0.1); color: #f54257; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 30px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Erro ao atualizar tabela:', error);
+      }
+    }
+
+    addBtn.addEventListener('click', () => {
+      isEditing = false;
+      editingId = null;
+      modalTitle.textContent = 'Novo Chatbot';
+      saveBtn.textContent = 'Salvar';
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('show');
+    });
+
+    document.addEventListener('click', async (e) => {
+      if (e.target.matches('[data-close-modal="chatbotModal"]')) {
+        closeModal();
+      }
+      if (e.target.matches('[data-confirm-cancel="confirmModal"]')) {
+        closeConfirmModal();
+      }
+      if (e.target.matches('[data-confirm-action="confirmModal"]')) {
+        confirmDelete();
+      }
+      if (e.target.matches('[data-close-details]')) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+      if (e.target.closest('.delete-btn')) {
+        const btn = e.target.closest('.delete-btn');
+        deleteId = btn.getAttribute('data-item-id');
+        confirmModal.classList.add('show');
+      }
+      if (e.target.closest('.view-btn')) {
+        const btn = e.target.closest('.view-btn');
+        const id = btn.getAttribute('data-item-id');
+        showDetails(id);
+      }
+      if (e.target.closest('.edit-btn')) {
+        const btn = e.target.closest('.edit-btn');
+        const id = btn.getAttribute('data-item-id');
+        editChatbot(id);
+      }
+      if (e.target.matches('.tab-btn')) {
+        const tabName = e.target.getAttribute('data-tab');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+      }
+    });
+
+    async function showDetails(id) {
+      try {
+        currentChatbotId = id;
+        const response = await fetch(`http://localhost:3000/api/chatbots/${id}`);
+        const chatbot = await response.json();
+        document.getElementById('modalTitle').textContent = `Detalhes - ${chatbot.login}`;
+        
+        document.getElementById('empresaText').innerHTML = `<p><strong>Empresa:</strong> ${chatbot.empresa_nome || 'N/A'}</p>`;
+        document.getElementById('servidorText').innerHTML = `<p><strong>Servidor:</strong> ${chatbot.servidor || 'N/A'}</p>`;
+        document.getElementById('loginText').innerHTML = `<p><strong>Usuário:</strong> ${chatbot.login}</p>`;
+        document.getElementById('responsavelText').innerHTML = `<p><strong>Responsável:</strong> ${chatbot.responsavel || 'N/A'}</p>`;
+        document.getElementById('contatoText').innerHTML = `<p><strong>Contato:</strong> ${chatbot.contato || 'N/A'}</p>`;
+        
+        const plataformas = [];
+        if (chatbot.bot_whatsapp === 'T') plataformas.push('WhatsApp');
+        if (chatbot.bot_facebook === 'T') plataformas.push('Facebook');
+        if (chatbot.bot_instagram === 'T') plataformas.push('Instagram');
+        if (chatbot.bot_email === 'T') plataformas.push('Email');
+        if (chatbot.bot_website === 'T') plataformas.push('Website');
+        if (chatbot.bot_telegram === 'T') plataformas.push('Telegram');
+        
+        document.getElementById('plataformasText').innerHTML = `<p><strong>Plataformas:</strong> ${plataformas.length ? plataformas.join(', ') : 'Nenhuma'}</p>`;
+        document.getElementById('licencasText').innerHTML = `<p><strong>Licenças:</strong> ${chatbot.qt_licenca || 'N/A'}</p>`;
+        document.getElementById('observacoesText').innerHTML = `<p><strong>Observações:</strong> ${chatbot.obs || 'N/A'}</p>`;
+        
+        await loadNumeros(id);
+        
+        detailsModal.style.display = 'flex';
+        detailsModal.offsetHeight;
+        detailsModal.classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar detalhes');
+      }
+    }
+
+    async function editChatbot(id) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/chatbots/${id}`);
+        const chatbot = await response.json();
+        isEditing = true;
+        editingId = id;
+        modalTitle.textContent = 'Editar Chatbot';
+        saveBtn.textContent = 'Atualizar';
+        
+        document.getElementById('empresa_id').value = chatbot.empresa_id || '';
+        document.getElementById('servidor').value = chatbot.servidor || '';
+        document.getElementById('login').value = chatbot.login || '';
+        document.getElementById('senha').value = chatbot.senha || '';
+        document.getElementById('responsavel').value = chatbot.responsavel || '';
+        document.getElementById('contato').value = chatbot.contato || '';
+        document.getElementById('qt_licenca').value = chatbot.qt_licenca || '';
+        document.getElementById('obs').value = chatbot.obs || '';
+        
+        document.querySelector('[name="bot_whatsapp"]').checked = chatbot.bot_whatsapp === 'T';
+        document.querySelector('[name="bot_facebook"]').checked = chatbot.bot_facebook === 'T';
+        document.querySelector('[name="bot_instagram"]').checked = chatbot.bot_instagram === 'T';
+        document.querySelector('[name="bot_email"]').checked = chatbot.bot_email === 'T';
+        document.querySelector('[name="bot_website"]').checked = chatbot.bot_website === 'T';
+        document.querySelector('[name="bot_telegram"]').checked = chatbot.bot_telegram === 'T';
+        
+        modal.style.display = 'flex';
+        modal.offsetHeight;
+        modal.classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar dados do chatbot');
+      }
+    }
+
+    async function confirmDelete() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/chatbots/${deleteId}`, { method: 'DELETE' });
+        if (response.ok) {
+          confirmModal.classList.add('closing');
+          setTimeout(async () => {
+            confirmModal.classList.remove('show', 'closing');
+            await refreshTable();
+          }, 300);
+        } else {
+          alert('Erro ao excluir chatbot');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function closeConfirmModal() {
+      confirmModal.classList.add('closing');
+      setTimeout(() => {
+        confirmModal.classList.remove('show', 'closing');
+        deleteId = null;
+      }, 300);
+    }
+
+    function closeModal() {
+      modal.classList.add('closing');
+      setTimeout(() => {
+        modal.classList.remove('show', 'closing');
+        modal.style.display = 'none';
+        form.reset();
+        isEditing = false;
+        editingId = null;
+      }, 300);
+    }
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    detailsModal.addEventListener('click', (e) => {
+      if (e.target === detailsModal) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      // Processar checkboxes
+      const checkboxes = ['bot_whatsapp', 'bot_facebook', 'bot_instagram', 'bot_email', 'bot_website', 'bot_telegram'];
+      checkboxes.forEach(checkbox => {
+        data[checkbox] = document.querySelector(`[name="${checkbox}"]`).checked ? 'T' : 'F';
+      });
+      
+      try {
+        const url = isEditing ? `http://localhost:3000/api/chatbots/${editingId}` : 'http://localhost:3000/api/chatbots';
+        const method = isEditing ? 'PUT' : 'POST';
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (response.ok) {
+          closeModal();
+          setTimeout(async () => {
+            await refreshTable();
+          }, 300);
+        } else {
+          alert(`Erro ao ${isEditing ? 'atualizar' : 'criar'} chatbot`);
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    });
+
+    async function loadNumeros(chatbotId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/numerobots?chatbot_id=${chatbotId}`);
+        const numeros = await response.json();
+        const container = document.getElementById('numerosList');
+        container.innerHTML = numeros.map(numero => `
+          <div class="entity-item">
+            <div class="entity-info">
+              <h4>${numero.numero}</h4>
+              <p>Tipo: ${numero.tipo || 'N/A'}</p>
+              <div class="entity-actions">
+                <button class="btn-edit" onclick="editNumero(${numero.id})">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M17 3L21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+                <button class="btn-delete" onclick="deleteNumero(${numero.id})">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6H21M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6H19Z" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhum número cadastrado</p>';
+      } catch (error) {
+        console.error('Erro ao carregar números:', error);
+      }
+    }
+
+    window.editNumero = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/numerobots/${id}`);
+        const numero = await response.json();
+        editingNumeroId = id;
+        document.getElementById('numeroModal').querySelector('.modal-title').textContent = 'Editar Número';
+        document.querySelector('#numeroForm [name="tipo"]').value = numero.tipo || '';
+        document.querySelector('#numeroForm [name="numero"]').value = numero.numero || '';
+        document.getElementById('numeroModal').style.display = 'flex';
+        document.getElementById('numeroModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar número');
+      }
+    };
+
+    window.deleteNumero = async (id) => {
+      if (confirm('Tem certeza que deseja excluir este número?')) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/numerobots/${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            await loadNumeros(currentChatbotId);
+          } else {
+            alert('Erro ao excluir número');
+          }
+        } catch (error) {
+          alert('Erro de conexão');
+        }
+      }
+    };
+
+    document.getElementById('addNumero').addEventListener('click', () => {
+      editingNumeroId = null;
+      document.getElementById('numeroModal').querySelector('.modal-title').textContent = 'Novo Número';
+      document.getElementById('numeroForm').reset();
+      document.getElementById('numeroModal').style.display = 'flex';
+      document.getElementById('numeroModal').classList.add('show');
+    });
+
+    document.getElementById('numeroForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData);
+      data.chatbot_id = currentChatbotId;
+      
+      try {
+        const url = editingNumeroId 
+          ? `http://localhost:3000/api/numerobots/${editingNumeroId}`
+          : 'http://localhost:3000/api/numerobots';
+        const method = editingNumeroId ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          document.getElementById('numeroModal').classList.remove('show');
+          document.getElementById('numeroModal').style.display = 'none';
+          await loadNumeros(currentChatbotId);
+        } else {
+          const errorData = await response.json();
+          alert(`Erro ao salvar: ${errorData.error || 'Erro desconhecido'}`);
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close-modal]')) {
+        const modalId = e.target.getAttribute('data-close-modal');
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.querySelector('form')?.reset();
+      }
+    });
+  });
+</script>

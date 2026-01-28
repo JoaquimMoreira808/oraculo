@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Bubbler+One&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto+Slab:wght@100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Zalando+Sans+SemiExpanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+		<meta name="generator" content={Astro.generator} />
+		<title>Invent</title>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+		background-color: #f2f1e4;
+		background-image: 
+			linear-gradient(rgba(230, 228, 215, 0.3) 3px, transparent 3px),
+			linear-gradient(90deg, rgba(230, 228, 215, 0.3) 3px, transparent 3px);
+		background-size: 60px 60px;
+		font-family: 'Arimo', sans-serif;
+	}
+
+	:root {
+		--table-animation: tableEnter 0.4s ease-out;
+	}
+
+	@keyframes tableEnter {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>
+
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const navigation = performance.getEntriesByType('navigation')[0];
+		const isReload = navigation?.type === 'reload';
+		
+		const currentPage = window.location.pathname;
+		const lastPage = sessionStorage.getItem('lastPage');
+		const isPageChange = lastPage && lastPage !== currentPage;
+		
+		if (isReload || !isPageChange) {
+			document.documentElement.style.setProperty('--table-animation', 'none');
+		}
+		
+		sessionStorage.setItem('lastPage', currentPage);
+		
+		window.reloadWithoutAnimation = function() {
+			document.documentElement.style.setProperty('--table-animation', 'none');
+			window.location.reload();
+		};
+	});
+</script>

@@ -1,0 +1,269 @@
+---
+import TopBar from '../components/TopBar.astro';
+import Layout from '../layouts/Layout.astro';
+import DataTable from '../components/DataTable.astro';
+import EditButton from '../components/EditButton.astro';
+import DeleteButton from '../components/DeleteButton.astro';
+import AddButton from '../components/AddButton.astro';
+import Modal from '../components/Modal.astro';
+import FormField from '../components/FormField.astro';
+import ConfirmModal from '../components/ConfirmModal.astro';
+import { fetchPaginatedData } from '../lib/api.js';
+
+// Forçar página dinâmica
+export const prerender = false;
+
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+
+console.log('Página solicitada:', page);
+console.log('URL completa:', Astro.url.href);
+
+const { data: empresas, pagination } = await fetchPaginatedData('empresas', page, limit);
+
+console.log('Dados retornados:', empresas.length, 'empresas');
+console.log('Paginação:', pagination);
+---
+
+<Layout>
+  <TopBar />
+  <main>
+    <div class="header">
+      <AddButton text="Nova Empresa" id="addEmpresaBtn" />
+    </div>
+    
+    <DataTable 
+      columns={['Nome', 'Razão Social', 'CNPJ', 'Cidade', 'Telefone', 'Email']} 
+      data={empresas}
+      pagination={pagination}
+      entityName="empresas"
+    >
+      {empresas.map((empresa) => (
+        <tr>
+          <td>{empresa.nome}</td>
+          <td>{empresa.razao}</td>
+          <td>{empresa.cnpj || '-'}</td>
+          <td>{empresa.cidade || '-'}</td>
+          <td>{empresa.telefone || '-'}</td>
+          <td>{empresa.email || '-'}</td>
+          <td>
+            <div class="action-buttons">
+              <EditButton itemId={empresa.id} />
+              <DeleteButton itemId={empresa.id} />
+            </div>
+          </td>
+        </tr>
+      ))}
+    </DataTable>
+  </main>
+
+  <Modal id="empresaModal" title="Nova Empresa" formId="empresaForm">
+    <FormField label="Nome" name="nome" required />
+    <FormField label="Razão Social" name="razao" required />
+    <FormField label="CNPJ" name="cnpj" />
+    <FormField label="Cidade" name="cidade" />
+    <FormField label="Telefone" name="telefone" />
+    <FormField label="Email" name="email" type="email" />
+  </Modal>
+
+  <ConfirmModal 
+    id="confirmModal" 
+    title="Tem certeza que deseja excluir esta empresa?" 
+    warning="Esse arquivo será perdido pra sempre! (Muito tempo)"
+    confirmText="Excluir"
+  />
+</Layout>
+
+<style>
+  main {
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('empresaModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const addBtn = document.getElementById('addEmpresaBtn');
+    const form = document.getElementById('empresaForm');
+    const modalTitle = modal.querySelector('.modal-title');
+    const saveBtn = modal.querySelector('.btn-save');
+    
+    let isEditing = false;
+    let editingId = null;
+    let deleteId = null;
+
+    // Função para recarregar sem animação
+    function reloadWithoutAnimation() {
+      if (window.reloadWithoutAnimation) {
+        window.reloadWithoutAnimation();
+      } else {
+        window.location.reload();
+      }
+    }
+
+    // Abrir modal para criar
+    addBtn.addEventListener('click', () => {
+      isEditing = false;
+      editingId = null;
+      modalTitle.textContent = 'Nova Empresa';
+      saveBtn.textContent = 'Salvar';
+      form.reset();
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('show');
+    });
+
+    // Excluir empresa
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-btn')) {
+        const btn = e.target.closest('.delete-btn');
+        deleteId = btn.getAttribute('data-item-id');
+        confirmModal.classList.add('show');
+      }
+    });
+
+    // Event listeners para componentes
+    document.addEventListener('click', (e) => {
+      // Fechar modal principal
+      if (e.target.matches('[data-close-modal="empresaModal"]')) {
+        closeModal();
+      }
+      
+      // Fechar modal de confirmação
+      if (e.target.matches('[data-confirm-cancel="confirmModal"]')) {
+        closeConfirmModal();
+      }
+      
+      // Confirmar exclusão
+      if (e.target.matches('[data-confirm-action="confirmModal"]')) {
+        confirmDelete();
+      }
+    });
+
+    // Confirmar exclusão
+    async function confirmDelete() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/empresas/${deleteId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          confirmModal.classList.add('closing');
+          setTimeout(() => {
+            confirmModal.classList.remove('show', 'closing');
+            reloadWithoutAnimation();
+          }, 300);
+        } else {
+          alert('Erro ao excluir empresa');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    }
+
+    // Fechar modal de confirmação
+    function closeConfirmModal() {
+      confirmModal.classList.add('closing');
+      setTimeout(() => {
+        confirmModal.classList.remove('show', 'closing');
+        deleteId = null;
+      }, 300);
+    }
+
+    // Fechar modal principal
+    function closeModal() {
+      modal.classList.add('closing');
+      setTimeout(() => {
+        modal.classList.remove('show', 'closing');
+        modal.style.display = 'none';
+        form.reset();
+        isEditing = false;
+        editingId = null;
+      }, 300);
+    }
+
+    // Abrir modal para editar
+    document.addEventListener('click', async (e) => {
+      if (e.target.closest('.edit-btn')) {
+        const btn = e.target.closest('.edit-btn');
+        const id = btn.getAttribute('data-item-id');
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/empresas/${id}`);
+          const empresa = await response.json();
+          
+          isEditing = true;
+          editingId = id;
+          modalTitle.textContent = 'Editar Empresa';
+          saveBtn.textContent = 'Atualizar';
+          
+          // Preencher formulário
+          form.nome.value = empresa.nome || '';
+          form.razao.value = empresa.razao || '';
+          form.cnpj.value = empresa.cnpj || '';
+          form.cidade.value = empresa.cidade || '';
+          form.telefone.value = empresa.telefone || '';
+          form.email.value = empresa.email || '';
+          
+          modal.style.display = 'flex';
+          modal.offsetHeight;
+          modal.classList.add('show');
+        } catch (error) {
+          alert('Erro ao carregar dados da empresa');
+        }
+      }
+    });
+    
+    // Fechar modais clicando fora
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    // Salvar empresa (criar ou editar)
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const url = isEditing 
+          ? `http://localhost:3000/api/empresas/${editingId}`
+          : 'http://localhost:3000/api/empresas';
+        
+        const method = isEditing ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          closeModal();
+          reloadWithoutAnimation();
+        } else {
+          alert('Erro ao salvar empresa');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    });
+  });
+</script>

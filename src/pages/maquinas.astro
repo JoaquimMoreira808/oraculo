@@ -1,0 +1,1072 @@
+---
+import TopBar from '../components/TopBar.astro';
+import Layout from '../layouts/Layout.astro';
+import DataTable from '../components/DataTable.astro';
+import ViewButton from '../components/ViewButton.astro';
+import EditButton from '../components/EditButton.astro';
+import DeleteButton from '../components/DeleteButton.astro';
+import AddButton from '../components/AddButton.astro';
+import Modal from '../components/Modal.astro';
+import FormField from '../components/FormField.astro';
+import ConfirmModal from '../components/ConfirmModal.astro';
+import SelectField from '../components/SelectField.astro';
+import TextAreaField from '../components/TextAreaField.astro';
+import { fetchPaginatedData, fetchApiData } from '../lib/api.js';
+
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+
+const [maquinasResult, empresas] = await Promise.all([
+  fetchPaginatedData('maquinas', page, limit),
+  fetchApiData('empresas')
+]);
+
+const { data: maquinas, pagination } = maquinasResult;
+---
+
+<Layout>
+  <TopBar />
+  <main>
+    <div class="header">
+      <AddButton text="Nova Máquina" id="addMaquinaBtn" />
+    </div>
+    
+    <DataTable 
+      columns={['Empresa', 'Nome', 'IP VPN', 'Operação', 'Local']} 
+      data={maquinas}
+      pagination={pagination}
+      entityName="máquinas"
+    >
+      {maquinas.map((maquina) => (
+        <tr>
+          <td>{maquina.empresa_nome || '-'}</td>
+          <td>{maquina.nome}</td>
+          <td>{maquina.ipvpn || '-'}</td>
+          <td>{maquina.operacao || '-'}</td>
+          <td>{maquina.localidade || '-'}</td>
+          <td>
+            <div class="action-buttons">
+              <ViewButton itemId={maquina.id} />
+              <EditButton itemId={maquina.id} />
+              <DeleteButton itemId={maquina.id} />
+            </div>
+          </td>
+        </tr>
+      ))}
+    </DataTable>
+  </main>
+
+  <Modal id="maquinaModal" title="Nova Máquina" formId="maquinaForm">
+    <SelectField 
+      label="Empresa" 
+      name="empresa_id" 
+      required 
+      options={empresas.map(e => ({value: e.id, text: e.nome}))}
+    />
+    <FormField label="Nome" name="nome" required />
+    <FormField label="IP VPN" name="ipvpn" />
+    <FormField label="Localidade" name="localidade" />
+    <FormField label="Versão" name="versao" />
+    <FormField label="Hardware" name="hardware" />
+    <TextAreaField label="Operação" name="operacao" />
+    <TextAreaField label="Observações" name="obs" />
+  </Modal>
+
+  <ConfirmModal 
+    id="confirmModal" 
+    title="Tem certeza que deseja excluir esta máquina?" 
+    warning="Esse arquivo será perdido pra sempre! (Muito tempo)"
+    confirmText="Excluir"
+  />
+
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-details>&times;</button>
+      <h2 id="modalTitle">Detalhes da Máquina</h2>
+      
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="detalhes">Detalhes</button>
+        <button class="tab-btn" data-tab="equipamentos">Equipamentos</button>
+        <button class="tab-btn" data-tab="rede">Rede</button>
+        <button class="tab-btn" data-tab="linhas">Linhas</button>
+        <button class="tab-btn" data-tab="senhas">Senhas</button>
+        <button class="tab-btn" data-tab="troncos">Troncos E1</button>
+      </div>
+
+      <div id="detalhes" class="tab-pane active">
+        <div class="details-stack">
+          <div class="detail-item" id="versaoText"></div>
+          <div class="detail-item" id="hardwareText"></div>
+          <div class="detail-item" id="observacoesText"></div>
+        </div>
+      </div>
+
+      <div id="equipamentos" class="tab-pane">
+        <div class="tab-header">
+          <button class="btn-add" id="addEquipamento">+ Novo Equipamento</button>
+        </div>
+        <div id="equipamentosList"></div>
+      </div>
+
+      <div id="rede" class="tab-pane">
+        <div class="tab-header">
+          <button class="btn-add" id="addRede">+ Nova Configuração de Rede</button>
+        </div>
+        <div id="redeList"></div>
+      </div>
+
+      <div id="linhas" class="tab-pane">
+        <div class="tab-header">
+          <button class="btn-add" id="addLinha">+ Nova Linha</button>
+        </div>
+        <div id="linhasList"></div>
+      </div>
+
+      <div id="senhas" class="tab-pane">
+        <div class="tab-header">
+          <button class="btn-add" id="addSenha">+ Nova Senha</button>
+        </div>
+        <div id="senhasList"></div>
+      </div>
+
+      <div id="troncos" class="tab-pane">
+        <div class="tab-header">
+          <button class="btn-add" id="addTronco">+ Novo Tronco E1</button>
+        </div>
+        <div id="troncosList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modais dos formulários -->
+  <Modal id="equipamentoModal" title="Equipamento" formId="equipamentoForm">
+    <FormField label="Nome" name="nome" required />
+    <SelectField 
+      label="Tipo" 
+      name="tipo" 
+      options={[
+        {value: 'FXO', text: 'FXO'},
+        {value: 'FXS', text: 'FXS'},
+        {value: 'E1', text: 'E1'},
+        {value: 'GSM', text: 'GSM'},
+        {value: 'OUTRO', text: 'OUTRO'}
+      ]}
+    />
+    <FormField label="IP" name="ip" />
+    <FormField label="Senha" name="senha" type="password" />
+  </Modal>
+
+  <Modal id="redeModal" title="Configuração de Rede" formId="redeForm">
+    <FormField label="IP" name="ip" required />
+    <FormField label="Placa" name="placa" />
+    <FormField label="Tipo" name="tipo" />
+  </Modal>
+
+  <Modal id="linhaModal" title="Linha Telefônica" formId="linhaForm">
+    <FormField label="Número" name="numero" required />
+    <TextAreaField label="Tipo" name="tipo" />
+    <FormField label="Operadora" name="operadora" />
+    <FormField label="Senha" name="senha" type="password" />
+  </Modal>
+
+  <Modal id="senhaModal" title="Senha de Serviço" formId="senhaForm">
+    <FormField label="Serviço" name="servico" required />
+    <FormField label="Usuário" name="usuario" />
+    <FormField label="Senha" name="senha" type="password" required />
+  </Modal>
+
+  <Modal id="troncoModal" title="Tronco E1" formId="troncoForm">
+    <FormField label="DDD" name="ddd" />
+    <FormField label="Prefixo" name="prefixo" />
+    <FormField label="Número Inicial" name="numero_ini" />
+    <FormField label="Número Final" name="numero_fin" />
+    <TextAreaField label="Equipamento" name="equipamento" />
+    <FormField label="Placa Link" name="placalink" />
+    <FormField label="Operadora" name="operadora" />
+    <TextAreaField label="Observações" name="obs" />
+  </Modal>
+</Layout>
+
+<style>
+  main {
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInScale 0.4s ease-out;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  #modalTitle {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+    font-size: 24px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn:hover {
+    color: #183054;
+  }
+
+  .tab-btn.active {
+    color: #183054;
+    border-bottom-color: #183054;
+    font-weight: 600;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  .details-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .detail-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 6px;
+  }
+
+  .detail-item p {
+    margin: 0;
+    color: #333;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .tab-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .btn-add {
+    background: #183054;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .btn-add:hover {
+    background: #0f1f35;
+  }
+
+  .entity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .entity-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px;
+  }
+
+  .entity-info {
+    flex: 1;
+  }
+
+  .entity-info h4 {
+    margin: 0 0 4px 0;
+    color: #333;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .entity-info p {
+    margin: 0 0 8px 0;
+    color: #666;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .entity-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .btn-edit, .btn-delete {
+    background: rgba(24, 48, 84, 0.1);
+    color: #183054;
+    border: none;
+    padding: 6px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 34px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-delete {
+    background: rgba(245, 66, 87, 0.1);
+    color: #f54257;
+  }
+
+  .btn-edit:hover {
+    background: rgba(24, 48, 84, 0.2);
+  }
+
+  .btn-delete:hover {
+    background: rgba(245, 66, 87, 0.2);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('maquinaModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const detailsModal = document.getElementById('detailsModal');
+    const addBtn = document.getElementById('addMaquinaBtn');
+    const form = document.getElementById('maquinaForm');
+    const modalTitle = modal.querySelector('.modal-title');
+    const saveBtn = modal.querySelector('.btn-save');
+    
+    let isEditing = false;
+    let editingId = null;
+    let deleteId = null;
+    let currentMaquinaId = null;
+    let currentEntity = null;
+    let editingEntityId = null;
+
+    async function refreshTable() {
+      try {
+        const response = await fetch('http://localhost:3000/api/maquinas');
+        const maquinas = await response.json();
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = maquinas.map(maquina => `
+          <tr>
+            <td>${maquina.empresa_nome || '-'}</td>
+            <td>${maquina.nome}</td>
+            <td>${maquina.ipvpn || '-'}</td>
+            <td>${maquina.operacao || '-'}</td>
+            <td>${maquina.localidade || '-'}</td>
+            <td>
+              <div class="action-buttons" style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                <button class="view-btn" title="Visualizar" data-item-id="${maquina.id}" style="background: rgba(24, 48, 84, 0.1); color: #183054; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 30px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+                <button class="edit-btn" title="Editar" data-item-id="${maquina.id}" style="background: rgba(24, 48, 84, 0.1); color: #183054; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 30px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button class="delete-btn" title="Excluir" data-item-id="${maquina.id}" style="background: rgba(245, 66, 87, 0.1); color: #f54257; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 30px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        console.error('Erro ao atualizar tabela:', error);
+      }
+    }
+
+    addBtn.addEventListener('click', () => {
+      isEditing = false;
+      editingId = null;
+      modalTitle.textContent = 'Nova Máquina';
+      saveBtn.textContent = 'Salvar';
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('show');
+    });
+
+    document.addEventListener('click', async (e) => {
+      if (e.target.matches('[data-close-modal="maquinaModal"]')) {
+        closeModal();
+      }
+      if (e.target.matches('[data-close-modal]')) {
+        const modalId = e.target.getAttribute('data-close-modal');
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.querySelector('form')?.reset();
+      }
+      if (e.target.matches('[data-confirm-cancel="confirmModal"]')) {
+        closeConfirmModal();
+      }
+      if (e.target.matches('[data-confirm-action="confirmModal"]')) {
+        confirmDelete();
+      }
+      if (e.target.matches('[data-close-details]')) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+      if (e.target.closest('.delete-btn')) {
+        const btn = e.target.closest('.delete-btn');
+        deleteId = btn.getAttribute('data-item-id');
+        confirmModal.classList.add('show');
+      }
+      if (e.target.closest('.view-btn')) {
+        const btn = e.target.closest('.view-btn');
+        const id = btn.getAttribute('data-item-id');
+        showDetails(id);
+      }
+      if (e.target.closest('.edit-btn')) {
+        const btn = e.target.closest('.edit-btn');
+        const id = btn.getAttribute('data-item-id');
+        editMaquina(id);
+      }
+      if (e.target.matches('.tab-btn')) {
+        const tabName = e.target.getAttribute('data-tab');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+      }
+    });
+
+    async function showDetails(id) {
+      try {
+        currentMaquinaId = id;
+        const response = await fetch(`http://localhost:3000/api/maquinas/${id}`);
+        const maquina = await response.json();
+        document.getElementById('modalTitle').textContent = `Detalhes - ${maquina.nome}`;
+        
+        // Versão
+        const versaoText = document.getElementById('versaoText');
+        if (maquina.versao) {
+          versaoText.innerHTML = `<p><strong>Versão:</strong> ${maquina.versao}</p>`;
+        } else {
+          versaoText.innerHTML = `<p><strong>Versão:</strong> <em style="color: #999;">Sem registros</em></p>`;
+        }
+        
+        // Hardware
+        const hardwareText = document.getElementById('hardwareText');
+        if (maquina.hardware) {
+          hardwareText.innerHTML = `<p><strong>Hardware:</strong> ${maquina.hardware}</p>`;
+        } else {
+          hardwareText.innerHTML = `<p><strong>Hardware:</strong> <em style="color: #999;">Sem registros</em></p>`;
+        }
+        
+        // Observações
+        const observacoesText = document.getElementById('observacoesText');
+        if (maquina.obs) {
+          observacoesText.innerHTML = `<p><strong>Observações:</strong> ${maquina.obs}</p>`;
+        } else {
+          observacoesText.innerHTML = `<p><strong>Observações:</strong> <em style="color: #999;">Sem registros</em></p>`;
+        }
+        
+        // Carregar dados das abas
+        await loadEquipamentos(id);
+        await loadRede(id);
+        await loadLinhas(id);
+        await loadSenhas(id);
+        await loadTroncos(id);
+        
+        detailsModal.style.display = 'flex';
+        detailsModal.offsetHeight;
+        detailsModal.classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar detalhes');
+      }
+    }
+
+    async function editMaquina(id) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/maquinas/${id}`);
+        const maquina = await response.json();
+        isEditing = true;
+        editingId = id;
+        modalTitle.textContent = 'Editar Máquina';
+        saveBtn.textContent = 'Atualizar';
+        document.getElementById('empresa_id').value = maquina.empresa_id || '';
+        document.getElementById('nome').value = maquina.nome || '';
+        document.getElementById('ipvpn').value = maquina.ipvpn || '';
+        document.getElementById('localidade').value = maquina.localidade || '';
+        document.getElementById('versao').value = maquina.versao || '';
+        document.getElementById('hardware').value = maquina.hardware || '';
+        document.getElementById('operacao').value = maquina.operacao || '';
+        document.getElementById('obs').value = maquina.obs || '';
+        modal.style.display = 'flex';
+        modal.offsetHeight;
+        modal.classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar dados da máquina');
+      }
+    }
+
+    async function confirmDelete() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/maquinas/${deleteId}`, { method: 'DELETE' });
+        if (response.ok) {
+          confirmModal.classList.add('closing');
+          setTimeout(async () => {
+            confirmModal.classList.remove('show', 'closing');
+            await refreshTable();
+          }, 300);
+        } else {
+          alert('Erro ao excluir máquina');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function closeConfirmModal() {
+      confirmModal.classList.add('closing');
+      setTimeout(() => {
+        confirmModal.classList.remove('show', 'closing');
+        deleteId = null;
+      }, 300);
+    }
+
+    function closeModal() {
+      modal.classList.add('closing');
+      setTimeout(() => {
+        modal.classList.remove('show', 'closing');
+        modal.style.display = 'none';
+        form.reset();
+        isEditing = false;
+        editingId = null;
+      }, 300);
+    }
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    detailsModal.addEventListener('click', (e) => {
+      if (e.target === detailsModal) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      try {
+        const url = isEditing ? `http://localhost:3000/api/maquinas/${editingId}` : 'http://localhost:3000/api/maquinas';
+        const method = isEditing ? 'PUT' : 'POST';
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        if (response.ok) {
+          closeModal();
+          setTimeout(async () => {
+            await refreshTable();
+          }, 300);
+        } else {
+          alert(`Erro ao ${isEditing ? 'atualizar' : 'criar'} máquina`);
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    });
+
+    // Funções para carregar entidades
+    async function loadEquipamentos(maquinaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/equipamentos?maquina_id=${maquinaId}`);
+        const equipamentos = await response.json();
+        const container = document.getElementById('equipamentosList');
+        container.innerHTML = equipamentos.map(eq => `
+          <div class="entity-item">
+            <div class="entity-info">
+              <h4>${eq.nome}</h4>
+              <p>IP: ${eq.ip || 'N/A'} | Tipo: ${eq.tipo || 'N/A'} | Senha: ${eq.senha || 'N/A'}</p>
+              <div class="entity-actions">
+                <button class="btn-edit" onclick="editEquipamento(${eq.id})">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 3C17.2626 2.73735 17.5744 2.52901 17.9176 2.38687C18.2608 2.24473 18.6286 2.17157 19 2.17157C19.3714 2.17157 19.7392 2.24473 20.0824 2.38687C20.4256 2.52901 20.7374 2.73735 21 3C21.2626 3.26264 21.471 3.57444 21.6131 3.9176C21.7553 4.26077 21.8284 4.62856 21.8284 5C21.8284 5.37143 21.7553 5.73923 21.6131 6.08239C21.471 6.42555 21.2626 6.73735 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button class="btn-delete" onclick="deleteEntity('equipamento', ${eq.id})">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhum equipamento cadastrado</p>';
+      } catch (error) {
+        console.error('Erro ao carregar equipamentos:', error);
+      }
+    }
+
+    async function loadRede(maquinaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/rede?maquina_id=${maquinaId}`);
+        const redes = await response.json();
+        const container = document.getElementById('redeList');
+        container.innerHTML = redes.map(rede => `
+          <div class="entity-item">
+            <div class="entity-info">
+              <h4>${rede.ip}</h4>
+              <p>Placa: ${rede.placa || 'N/A'} | Tipo: ${rede.tipo || 'N/A'}</p>
+            </div>
+            <div class="entity-actions">
+              <button class="btn-edit" onclick="editRede(${rede.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 3L21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+              <button class="btn-delete" onclick="deleteEntity('rede', ${rede.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 6H21M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6H19Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhuma configuração de rede cadastrada</p>';
+      } catch (error) {
+        console.error('Erro ao carregar rede:', error);
+      }
+    }
+
+    async function loadLinhas(maquinaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/linhas?maquina_id=${maquinaId}`);
+        const linhas = await response.json();
+        const container = document.getElementById('linhasList');
+        container.innerHTML = linhas.map(linha => `
+          <div class="entity-item">
+            <div class="entity-info">
+              <h4>${linha.numero}</h4>
+              <p>Operadora: ${linha.operadora || 'N/A'} | Tipo: ${linha.tipo || 'N/A'}</p>
+            </div>
+            <div class="entity-actions">
+              <button class="btn-edit" onclick="editLinha(${linha.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 3L21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+              <button class="btn-delete" onclick="deleteEntity('linha', ${linha.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 6H21M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6H19Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhuma linha cadastrada</p>';
+      } catch (error) {
+        console.error('Erro ao carregar linhas:', error);
+      }
+    }
+
+    async function loadSenhas(maquinaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/senhas?maquina_id=${maquinaId}`);
+        const senhas = await response.json();
+        const container = document.getElementById('senhasList');
+        container.innerHTML = senhas.map(senha => `
+          <div class="entity-item">
+            <div class="entity-info">
+              <h4>${senha.servico}</h4>
+              <p>Usuário: ${senha.usuario || 'N/A'}</p>
+            </div>
+            <div class="entity-actions">
+              <button class="btn-edit" onclick="editSenha(${senha.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 3L21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+              <button class="btn-delete" onclick="deleteEntity('senha', ${senha.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 6H21M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6H19Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhuma senha cadastrada</p>';
+      } catch (error) {
+        console.error('Erro ao carregar senhas:', error);
+      }
+    }
+
+    async function loadTroncos(maquinaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/troncos?maquina_id=${maquinaId}`);
+        const troncos = await response.json();
+        const container = document.getElementById('troncosList');
+        container.innerHTML = troncos.map(tronco => `
+          <div class="entity-item">
+            <div class="entity-info">
+              <h4>DDD ${tronco.ddd} - ${tronco.prefixo}</h4>
+              <p>Operadora: ${tronco.operadora || 'N/A'} | ${tronco.numero_ini}-${tronco.numero_fin}</p>
+            </div>
+            <div class="entity-actions">
+              <button class="btn-edit" onclick="editTronco(${tronco.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 3L21 7L7.5 20.5L2 22L3.5 16.5L17 3Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+              <button class="btn-delete" onclick="deleteEntity('troncoe1', ${tronco.id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 6H21M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6H19Z" stroke="currentColor" stroke-width="2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhum tronco E1 cadastrado</p>';
+      } catch (error) {
+        console.error('Erro ao carregar troncos:', error);
+      }
+    }
+
+    // Funções globais para edição
+    window.editEquipamento = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/equipamentos/${id}`);
+        const eq = await response.json();
+        currentEntity = 'equipamentos';
+        editingEntityId = id;
+        document.getElementById('equipamentoModal').querySelector('.modal-title').textContent = 'Editar Equipamento';
+        document.querySelector('#equipamentoForm [name="nome"]').value = eq.nome || '';
+        document.querySelector('#equipamentoForm [name="tipo"]').value = eq.tipo || '';
+        document.querySelector('#equipamentoForm [name="ip"]').value = eq.ip || '';
+        document.querySelector('#equipamentoForm [name="senha"]').value = eq.senha || '';
+        document.getElementById('equipamentoModal').style.display = 'flex';
+        document.getElementById('equipamentoModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar equipamento');
+      }
+    };
+
+    window.editRede = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/rede/${id}`);
+        const rede = await response.json();
+        currentEntity = 'rede';
+        editingEntityId = id;
+        document.getElementById('redeModal').querySelector('.modal-title').textContent = 'Editar Rede';
+        document.querySelector('#redeForm [name="ip"]').value = rede.ip || '';
+        document.querySelector('#redeForm [name="placa"]').value = rede.placa || '';
+        document.querySelector('#redeForm [name="tipo"]').value = rede.tipo || '';
+        document.getElementById('redeModal').style.display = 'flex';
+        document.getElementById('redeModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar rede');
+      }
+    };
+
+    window.editLinha = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/linhas/${id}`);
+        const linha = await response.json();
+        currentEntity = 'linhas';
+        editingEntityId = id;
+        document.getElementById('linhaModal').querySelector('.modal-title').textContent = 'Editar Linha';
+        document.querySelector('#linhaForm [name="numero"]').value = linha.numero || '';
+        document.querySelector('#linhaForm [name="tipo"]').value = linha.tipo || '';
+        document.querySelector('#linhaForm [name="operadora"]').value = linha.operadora || '';
+        document.querySelector('#linhaForm [name="senha"]').value = linha.senha || '';
+        document.getElementById('linhaModal').style.display = 'flex';
+        document.getElementById('linhaModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar linha');
+      }
+    };
+
+    window.editSenha = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/senhas/${id}`);
+        const senha = await response.json();
+        currentEntity = 'senhas';
+        editingEntityId = id;
+        document.getElementById('senhaModal').querySelector('.modal-title').textContent = 'Editar Senha';
+        document.querySelector('#senhaForm [name="servico"]').value = senha.servico || '';
+        document.querySelector('#senhaForm [name="usuario"]').value = senha.usuario || '';
+        document.querySelector('#senhaForm [name="senha"]').value = senha.senha || '';
+        document.getElementById('senhaModal').style.display = 'flex';
+        document.getElementById('senhaModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar senha');
+      }
+    };
+
+    window.editTronco = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/troncos/${id}`);
+        const tronco = await response.json();
+        currentEntity = 'troncos';
+        editingEntityId = id;
+        document.getElementById('troncoModal').querySelector('.modal-title').textContent = 'Editar Tronco E1';
+        document.querySelector('#troncoForm [name="ddd"]').value = tronco.ddd || '';
+        document.querySelector('#troncoForm [name="prefixo"]').value = tronco.prefixo || '';
+        document.querySelector('#troncoForm [name="numero_ini"]').value = tronco.numero_ini || '';
+        document.querySelector('#troncoForm [name="numero_fin"]').value = tronco.numero_fin || '';
+        document.querySelector('#troncoForm [name="equipamento"]').value = tronco.equipamento || '';
+        document.querySelector('#troncoForm [name="placalink"]').value = tronco.placalink || '';
+        document.querySelector('#troncoForm [name="operadora"]').value = tronco.operadora || '';
+        document.querySelector('#troncoForm [name="obs"]').value = tronco.obs || '';
+        document.getElementById('troncoModal').style.display = 'flex';
+        document.getElementById('troncoModal').classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar tronco');
+      }
+    };
+
+    window.deleteEntity = async (entity, id) => {
+      if (confirm('Tem certeza que deseja excluir este item?')) {
+        try {
+          const entityMap = {
+            'equipamento': 'equipamentos',
+            'rede': 'rede',
+            'linha': 'linhas', 
+            'senha': 'senhas',
+            'troncoe1': 'troncos'
+          };
+          
+          const apiEntity = entityMap[entity];
+          const response = await fetch(`http://localhost:3000/api/${apiEntity}/${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            // Recarregar a lista correspondente
+            switch(entity) {
+              case 'equipamento': await loadEquipamentos(currentMaquinaId); break;
+              case 'rede': await loadRede(currentMaquinaId); break;
+              case 'linha': await loadLinhas(currentMaquinaId); break;
+              case 'senha': await loadSenhas(currentMaquinaId); break;
+              case 'troncoe1': await loadTroncos(currentMaquinaId); break;
+            }
+          } else {
+            alert('Erro ao excluir item');
+          }
+        } catch (error) {
+          alert('Erro de conexão');
+        }
+      }
+    };
+
+    // Event listeners para botões de adicionar
+    document.getElementById('addEquipamento').addEventListener('click', () => {
+      currentEntity = 'equipamentos';
+      editingEntityId = null;
+      document.getElementById('equipamentoModal').querySelector('.modal-title').textContent = 'Novo Equipamento';
+      document.getElementById('equipamentoForm').reset();
+      document.getElementById('equipamentoModal').style.display = 'flex';
+      document.getElementById('equipamentoModal').classList.add('show');
+    });
+
+    document.getElementById('addRede').addEventListener('click', () => {
+      currentEntity = 'rede';
+      editingEntityId = null;
+      document.getElementById('redeModal').querySelector('.modal-title').textContent = 'Nova Configuração de Rede';
+      document.getElementById('redeForm').reset();
+      document.getElementById('redeModal').style.display = 'flex';
+      document.getElementById('redeModal').classList.add('show');
+    });
+
+    document.getElementById('addLinha').addEventListener('click', () => {
+      currentEntity = 'linhas';
+      editingEntityId = null;
+      document.getElementById('linhaModal').querySelector('.modal-title').textContent = 'Nova Linha';
+      document.getElementById('linhaForm').reset();
+      document.getElementById('linhaModal').style.display = 'flex';
+      document.getElementById('linhaModal').classList.add('show');
+    });
+
+    document.getElementById('addSenha').addEventListener('click', () => {
+      currentEntity = 'senhas';
+      editingEntityId = null;
+      document.getElementById('senhaModal').querySelector('.modal-title').textContent = 'Nova Senha';
+      document.getElementById('senhaForm').reset();
+      document.getElementById('senhaModal').style.display = 'flex';
+      document.getElementById('senhaModal').classList.add('show');
+    });
+
+    document.getElementById('addTronco').addEventListener('click', () => {
+      currentEntity = 'troncos';
+      editingEntityId = null;
+      document.getElementById('troncoModal').querySelector('.modal-title').textContent = 'Novo Tronco E1';
+      document.getElementById('troncoForm').reset();
+      document.getElementById('troncoModal').style.display = 'flex';
+      document.getElementById('troncoModal').classList.add('show');
+    });
+
+    // Submissão dos formulários das entidades
+    ['equipamentoForm', 'redeForm', 'linhaForm', 'senhaForm', 'troncoForm'].forEach(formId => {
+      document.getElementById(formId).addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+        data.maquina_id = currentMaquinaId;
+        
+        try {
+          const entityMap = {
+            'equipamentoForm': 'equipamentos',
+            'redeForm': 'rede', 
+            'linhaForm': 'linhas',
+            'senhaForm': 'senhas',
+            'troncoForm': 'troncos'
+          };
+          
+          const entity = entityMap[formId];
+          const url = editingEntityId 
+            ? `http://localhost:3000/api/${entity}/${editingEntityId}`
+            : `http://localhost:3000/api/${entity}`;
+          const method = editingEntityId ? 'PUT' : 'POST';
+          
+          const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          
+          if (response.ok) {
+            // Fechar modal
+            const modal = e.target.closest('.modal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            
+            // Recarregar lista
+            switch(entity) {
+              case 'equipamentos': await loadEquipamentos(currentMaquinaId); break;
+              case 'rede': await loadRede(currentMaquinaId); break;
+              case 'linhas': await loadLinhas(currentMaquinaId); break;
+              case 'senhas': await loadSenhas(currentMaquinaId); break;
+              case 'troncos': await loadTroncos(currentMaquinaId); break;
+            }
+          } else {
+            const errorData = await response.json();
+            alert(`Erro ao salvar: ${errorData.error || 'Erro desconhecido'}`);
+          }
+        } catch (error) {
+          console.error('Erro:', error);
+          alert('Erro de conexão');
+        }
+      });
+    });
+  });
+</script>
