@@ -426,6 +426,13 @@ const { data: chatbots, pagination } = chatbotsResult;
     let currentChatbotId = null;
     let editingNumeroId = null;
 
+    // Verificar se deve abrir modal de detalhes automaticamente
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewId = urlParams.get('view');
+    if (viewId) {
+      setTimeout(() => showDetails(viewId), 100);
+    }
+
     async function refreshTable() {
       try {
         const response = await fetch('http://localhost:3000/api/chatbots');

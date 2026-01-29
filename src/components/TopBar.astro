@@ -4,7 +4,12 @@
 
 <div class="topbar">
   <div class="logo">
-    <h1>Invent v.2</h1>
+    <h1>Placeholder</h1>
+    <a href="/" class="search-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
   </div>
   
   <nav class="nav-buttons">
@@ -42,6 +47,12 @@
     -webkit-backdrop-filter: blur(10px);
   }
 
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
   .logo h1 {
     font-family: 'Roboto Slab', serif;
     font-weight: 600;
@@ -52,6 +63,25 @@
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+  }
+
+  .search-icon {
+    color: white;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .search-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .search-icon:active {
+    transform: scale(0.95);
   }
 
   .nav-buttons {
