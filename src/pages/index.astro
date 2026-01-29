@@ -627,4 +627,16 @@ import SearchResults from '../components/SearchResults.astro';
 			closeResults();
 		}
 	});
+
+	// Verificar se há parâmetro de pesquisa na URL
+	document.addEventListener('DOMContentLoaded', () => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const searchQuery = urlParams.get('search');
+		if (searchQuery) {
+			searchInput.value = searchQuery;
+			performSearch(searchQuery);
+			// Limpar o parâmetro da URL
+			window.history.replaceState({}, document.title, window.location.pathname);
+		}
+	});
 </script>
