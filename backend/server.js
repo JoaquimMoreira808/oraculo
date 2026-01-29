@@ -14,6 +14,7 @@ const chatbotsRoutes = require('./routes/chatbots');
 const numerobotsRoutes = require('./routes/numerobots');
 const contatosRoutes = require('./routes/contatos');
 const searchRoutes = require('./routes/search');
+const relatedRoutes = require('./routes/related');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3000;
@@ -34,6 +35,7 @@ app.use('/api/chatbots', chatbotsRoutes);
 app.use('/api/numerobots', numerobotsRoutes);
 app.use('/api/contatos', contatosRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/related', relatedRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -71,24 +71,8 @@ const fieldLabels = {
         ) : (
           results.map((result) => (
             <div class="empresa-result">
-              <div class="empresa-header">
-                <h4>{result.empresa.nome}</h4>
-                <span class="empresa-razao">{result.empresa.razao}</span>
-              </div>
-              
-              <div class="matches">
-                {result.matches.map((match) => (
-                  <div class="match-item">
-                    <span class="match-table">
-                      {tableLabels[match.table] || match.table}
-                    </span>
-                    <span class="match-field">
-                      {fieldLabels[match.field] || match.field}:
-                    </span>
-                    <span class="match-value">{match.value}</span>
-                  </div>
-                ))}
-              </div>
+              <h4 class="record-name">{result.empresa.nome}</h4>
+              <span class="record-type">Empresa</span>
             </div>
           ))
         )}
@@ -105,13 +89,13 @@ const fieldLabels = {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 20px;
     z-index: 1000;
-    animation: fadeIn 0.2s ease-out;
+    animation: fadeIn 0.4s ease-out;
   }
 
   @keyframes fadeIn {
@@ -122,7 +106,7 @@ const fieldLabels = {
   @keyframes slideIn {
     from { 
       opacity: 0;
-      transform: translateY(-20px) scale(0.95);
+      transform: translateY(-20px) scale(0.97);
     }
     to { 
       opacity: 1;
@@ -131,89 +115,70 @@ const fieldLabels = {
   }
 
   .search-results {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1);
+    background: #f2f1e4;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 700px;
+    max-width: 1200px;
     max-height: 85vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    animation: slideIn 0.3s ease-out;
+    animation: slideIn 0.4s ease-out;
     margin-top: 60px;
+    font-family: 'Arimo', sans-serif;
   }
 
   .search-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 28px;
-    border-bottom: 1px solid #e8eaed;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    padding: 20px;
+    border-bottom: 3px solid rgba(230, 228, 215, 0.3);
+    background: #183054;
     position: relative;
   }
 
-  .search-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #007acc, #0099ff, #007acc);
-    background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
-  }
 
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
 
   .search-header h3 {
     margin: 0;
-    color: #1a1a1a;
+    color: #ffffff;
     font-size: 20px;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .search-header h3::before {
-    content: '🔍';
-    font-size: 18px;
+    font-family: 'Arimo', sans-serif;
   }
 
   .close-btn {
-    background: #f1f3f4;
+    background: rgba(255, 255, 255, 0.15);
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: #5f6368;
-    padding: 0;
+    color: #ffffff;
+    padding: 8px;
     width: 36px;
     height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
+    border-radius: 6px;
+    transition: background-color 0.2s, transform 0.1s;
     font-weight: 300;
   }
 
   .close-btn:hover {
-    background: #e8eaed;
-    color: #202124;
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .close-btn:active {
+    transform: scale(0.95);
   }
 
   .results-container {
     overflow-y: auto;
     padding: 0;
     flex: 1;
-    background: #fafbfc;
+    background: #f2f1e4;
   }
 
   .results-container::-webkit-scrollbar {
@@ -229,15 +194,12 @@ const fieldLabels = {
     border-radius: 3px;
   }
 
-  .results-container::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-  }
-
   .no-results {
     text-align: center;
-    padding: 60px 20px;
-    color: #5f6368;
+    padding: 40px 20px;
+    color: #666666;
     font-size: 16px;
+    font-family: 'Arimo', sans-serif;
   }
 
   .no-results::before {
@@ -249,130 +211,39 @@ const fieldLabels = {
 
   .empresa-result {
     margin: 0;
-    padding: 24px 28px;
-    border-bottom: 1px solid #e8eaed;
+    padding: 20px;
+    border-bottom: 3px solid rgba(230, 228, 215, 0.3);
     background: white;
-    transition: all 0.2s ease;
     position: relative;
-  }
-
-  .empresa-result:hover {
-    background: #f8f9fa;
-    box-shadow: inset 4px 0 0 #007acc;
   }
 
   .empresa-result:last-child {
     border-bottom: none;
   }
 
-  .empresa-header {
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .empresa-header h4 {
-    margin: 0 0 6px 0;
-    color: #007acc;
+  .record-name {
+    margin: 0;
+    color: #333333;
     font-size: 18px;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-family: 'Arimo', sans-serif;
   }
 
-  .empresa-header h4::before {
-    content: '🏢';
-    font-size: 16px;
-  }
-
-  .empresa-razao {
-    color: #5f6368;
+  .record-type {
+    color: #666666;
     font-size: 14px;
-    font-style: italic;
-    margin-left: 24px;
-  }
-
-  .matches {
-    display: grid;
-    gap: 12px;
-  }
-
-  .match-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 10px;
-    border: 1px solid #e8eaed;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .match-item:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 122, 204, 0.15);
-    border-color: #007acc;
-  }
-
-  .match-table {
-    background: linear-gradient(135deg, #007acc 0%, #0099ff 100%);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    min-width: fit-content;
-    box-shadow: 0 2px 8px rgba(0, 122, 204, 0.3);
-    position: relative;
-  }
-
-  .match-table::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  .match-item:hover .match-table::before {
-    left: 100%;
-  }
-
-  .match-field {
-    color: #5f6368;
-    font-size: 13px;
     font-weight: 500;
-    min-width: fit-content;
-    text-transform: capitalize;
-  }
-
-  .match-value {
-    color: #202124;
-    font-weight: 600;
-    font-size: 14px;
-    background: linear-gradient(135deg, #e8f0fe 0%, #f8f9fa 100%);
-    padding: 4px 8px;
-    border-radius: 6px;
-    border: 1px solid #e8eaed;
-    flex: 1;
-    word-break: break-word;
+    font-family: 'Arimo', sans-serif;
   }
 
   .results-count {
-    padding: 12px 28px;
-    background: #e8f0fe;
-    color: #1967d2;
+    padding: 12px 20px;
+    background: #183054;
+    color: #ffffff;
     font-size: 13px;
     font-weight: 500;
-    border-bottom: 1px solid #e8eaed;
+    border-bottom: 3px solid rgba(230, 228, 215, 0.3);
+    font-family: 'Arimo', sans-serif;
   }
 
   @media (max-width: 768px) {
@@ -384,7 +255,7 @@ const fieldLabels = {
       width: 100%;
       max-height: 90vh;
       margin-top: 20px;
-      border-radius: 12px;
+      border-radius: 6px;
     }
 
     .search-header {
@@ -397,22 +268,6 @@ const fieldLabels = {
 
     .empresa-result {
       padding: 20px;
-    }
-
-    .match-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-      padding: 16px;
-    }
-
-    .match-table {
-      align-self: flex-start;
-    }
-
-    .match-value {
-      width: 100%;
-      margin-top: 4px;
     }
   }
 </style>

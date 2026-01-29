@@ -38,6 +38,53 @@ export async function fetchApiData(endpoint, options = {}) {
 }
 
 /**
+ * Busca dados paginados da API
+ * @param {string} endpoint - Endpoint da API (ex: 'empresas', 'chatbots')
+ * @param {number} page - Número da página (padrão: 1)
+ * @param {number} limit - Limite de itens por página (padrão: 10)
+ * @param {Object} options - Opções adicionais da requisição
+ * @returns {Promise<{data: Array, pagination: Object}>} Objeto com dados e informações de paginação
+ */
+export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options = {}) {
+  try {
+    const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/api/${endpoint}?page=${page}&limit=${limit}`;
+    
+    const response = await fetch(url, options);
+    
+    if (!response.ok) {
+      console.error(`Erro na API ${endpoint}:`, response.status);
+      return { data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
+    }
+    
+    const result = await response.json();
+    
+    // Se tem estrutura de paginação, retorna os dados e paginação
+    if (result && typeof result === 'object' && result.data) {
+      return {
+        data: Array.isArray(result.data) ? result.data : [],
+        pagination: result.pagination || { page: 1, limit, total: 0, totalPages: 0 }
+      };
+    }
+    
+    // Se é array direto, simula paginação
+    if (Array.isArray(result)) {
+      return {
+        data: result,
+        pagination: { page: 1, limit: result.length, total: result.length, totalPages: 1 }
+      };
+    }
+    
+    // Fallback
+    return { data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
+    
+  } catch (error) {
+    console.error(`Erro ao buscar ${endpoint}:`, error);
+    return { data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
+  }
+}
+
+/**
  * Busca universal em todas as tabelas do sistema
  * @param {string} query - Termo de busca
  * @returns {Promise<Array>} Array de resultados agrupados por empresa
@@ -68,32 +115,28 @@ export async function universalSearch(query) {
 }
 
 /**
- * Busca dados paginados da API
- * @param {string} endpoint - Endpoint da API
- * @param {number} page - Página atual
- * @param {number} limit - Itens por página
- * @returns {Promise<Object>} Objeto com data e pagination
+ * Busca registros relacionados por chave estrangeira
+ * @param {string} type - Tipo do registro (empresa, maquina, etc.)
+ * @param {number} id - ID do registro
+ * @returns {Promise<Array>} Array de registros relacionados
  */
-export async function fetchPaginatedData(endpoint, page = 1, limit = 10) {
+export async function fetchRelatedRecords(type, id) {
   try {
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
-    const url = `${baseUrl}/api/${endpoint}?page=${page}&limit=${limit}`;
+    const url = `${baseUrl}/api/related/${type}/${id}`;
     
     const response = await fetch(url);
     
     if (!response.ok) {
-      return { data: [], pagination: {} };
+      console.error('Erro na busca de relacionados:', response.status);
+      return [];
     }
     
-    const result = await response.json();
-    
-    return {
-      data: result.data || [],
-      pagination: result.pagination || {}
-    };
+    const results = await response.json();
+    return Array.isArray(results) ? results : [];
     
   } catch (error) {
-    console.error(`Erro ao buscar ${endpoint} paginado:`, error);
-    return { data: [], pagination: {} };
+    console.error('Erro ao buscar registros relacionados:', error);
+    return [];
   }
 }
