@@ -8,34 +8,56 @@ router.get('/', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
+    const empresaId = req.query.empresa_id;
     
-    const [rows] = await db.query(`
+    let query = `
       SELECT c.*, e.nome as empresa_nome 
       FROM chatbot c 
       LEFT JOIN empresa e ON c.empresa_id = e.id 
-      WHERE c.is_active = 'T' 
-      ORDER BY e.nome ASC, c.login ASC
-      LIMIT ${limit} OFFSET ${offset}
-    `);
+      WHERE c.is_active = 'T'
+    `;
     
-    const [countResult] = await db.query(`
+    let countQuery = `
       SELECT COUNT(*) as total 
       FROM chatbot c 
       WHERE c.is_active = 'T'
-    `);
+    `;
+    
+    const params = [];
+    const countParams = [];
+    
+    if (empresaId) {
+      query += ' AND c.empresa_id = ?';
+      countQuery += ' AND c.empresa_id = ?';
+      params.push(empresaId);
+      countParams.push(empresaId);
+    }
+    
+    query += ' ORDER BY e.nome ASC, c.login ASC';
+    
+    if (!empresaId) {
+      query += ` LIMIT ${limit} OFFSET ${offset}`;
+    }
+    
+    const [rows] = await db.query(query, params);
+    const [countResult] = await db.query(countQuery, countParams);
     
     const total = countResult[0].total;
     const totalPages = Math.ceil(total / limit);
     
-    res.json({
-      data: rows,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages
-      }
-    });
+    if (empresaId) {
+      res.json(rows);
+    } else {
+      res.json({
+        data: rows,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages
+        }
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
