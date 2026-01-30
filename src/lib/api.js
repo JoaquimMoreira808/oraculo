@@ -87,16 +87,21 @@ export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options
 /**
  * Busca universal em todas as tabelas do sistema
  * @param {string} query - Termo de busca
+ * @param {string} type - Tipo de entidade para filtrar (opcional)
  * @returns {Promise<Array>} Array de resultados agrupados por empresa
  */
-export async function universalSearch(query) {
+export async function universalSearch(query, type = 'all') {
   try {
     if (!query || query.trim().length < 2) {
       return [];
     }
 
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
-    const url = `${baseUrl}/api/search?q=${encodeURIComponent(query.trim())}`;
+    let url = `${baseUrl}/api/search?q=${encodeURIComponent(query.trim())}`;
+    
+    if (type && type !== 'all') {
+      url += `&type=${encodeURIComponent(type)}`;
+    }
     
     const response = await fetch(url);
     
