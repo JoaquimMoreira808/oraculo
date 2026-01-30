@@ -15,6 +15,10 @@ const numerobotsRoutes = require('./routes/numerobots');
 const contatosRoutes = require('./routes/contatos');
 const searchRoutes = require('./routes/search');
 const relatedRoutes = require('./routes/related');
+const revendaCloudRoutes = require('./routes/revenda-cloud');
+const perfilCloudRoutes = require('./routes/perfil-cloud');
+const contatoCloudRoutes = require('./routes/contato-cloud');
+const organizacaoCloudRoutes = require('./routes/organizacao-cloud');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || 3000;
@@ -36,6 +40,10 @@ app.use('/api/numerobots', numerobotsRoutes);
 app.use('/api/contatos', contatosRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/related', relatedRoutes);
+app.use('/api/revenda-cloud', revendaCloudRoutes);
+app.use('/api/perfil-cloud', perfilCloudRoutes);
+app.use('/api/contato-cloud', contatoCloudRoutes);
+app.use('/api/organizacao-cloud', organizacaoCloudRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

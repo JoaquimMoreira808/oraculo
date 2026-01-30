@@ -1,0 +1,603 @@
+---
+import TopBar from '../components/TopBar.astro';
+import Layout from '../layouts/Layout.astro';
+import DataTable from '../components/DataTable.astro';
+import ViewButton from '../components/ViewButton.astro';
+import EditButton from '../components/EditButton.astro';
+import DeleteButton from '../components/DeleteButton.astro';
+import AddButton from '../components/AddButton.astro';
+import Modal from '../components/Modal.astro';
+import FormField from '../components/FormField.astro';
+import ConfirmModal from '../components/ConfirmModal.astro';
+import { fetchPaginatedData } from '../lib/api.js';
+
+export const prerender = false;
+
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+
+const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud', page, limit);
+---
+
+<Layout>
+  <TopBar />
+  <main>
+    <div class="header">
+      <AddButton text="Nova Revenda" id="addRevendaBtn" />
+    </div>
+    
+    <DataTable 
+      columns={['Nome Fantasia', 'Razão Social', 'CNPJ', 'Telefone', 'Email']} 
+      data={revendas}
+      pagination={pagination}
+      entityName="revenda-cloud"
+    >
+      {revendas.map((revenda) => (
+        <tr>
+          <td>{revenda.nome_fantasia}</td>
+          <td>{revenda.razao_social}</td>
+          <td>{revenda.cnpj || '-'}</td>
+          <td>{revenda.telefone || '-'}</td>
+          <td>{revenda.email || '-'}</td>
+          <td>
+            <div class="action-buttons">
+              <ViewButton itemId={revenda.id} />
+              <EditButton itemId={revenda.id} />
+              <DeleteButton itemId={revenda.id} />
+            </div>
+          </td>
+        </tr>
+      ))}
+    </DataTable>
+  </main>
+
+  <Modal id="revendaModal" title="Nova Revenda" formId="revendaForm">
+    <FormField label="Nome Fantasia" name="nome_fantasia" required />
+    <FormField label="Razão Social" name="razao_social" required />
+    <FormField label="CNPJ" name="cnpj" />
+    <FormField label="Telefone" name="telefone" />
+    <FormField label="Email" name="email" type="email" />
+  </Modal>
+
+  <ConfirmModal 
+    id="confirmModal" 
+    title="Tem certeza que deseja excluir esta revenda?" 
+    warning="Esse arquivo será perdido pra sempre! (Muito tempo)"
+    confirmText="Excluir"
+  />
+
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-details>&times;</button>
+      <h2 id="modalTitle">Detalhes da Revenda</h2>
+      
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="detalhes">Detalhes</button>
+        <button class="tab-btn" data-tab="perfis">Perfis</button>
+        <button class="tab-btn" data-tab="contatos">Contatos</button>
+        <button class="tab-btn" data-tab="organizacoes">Organizações</button>
+      </div>
+
+      <div id="detalhes" class="tab-pane active">
+        <div class="details-stack">
+          <div class="detail-item" id="nomeFantasiaText"></div>
+          <div class="detail-item" id="razaoSocialText"></div>
+          <div class="detail-item" id="cnpjText"></div>
+          <div class="detail-item" id="telefoneText"></div>
+          <div class="detail-item" id="emailText"></div>
+        </div>
+      </div>
+
+      <div id="perfis" class="tab-pane">
+        <div id="perfisList"></div>
+      </div>
+
+      <div id="contatos" class="tab-pane">
+        <div id="contatosList"></div>
+      </div>
+
+      <div id="organizacoes" class="tab-pane">
+        <div id="organizacoesList"></div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  main {
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInScale 0.4s ease-out;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  #modalTitle {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+    font-size: 24px;
+  }
+
+  .details-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .detail-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 6px;
+  }
+
+  .detail-item p {
+    margin: 0;
+    color: #333;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid #e9ecef;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+
+  .tab-btn:hover {
+    color: #183054;
+  }
+
+  .tab-btn.active {
+    color: #183054;
+    border-bottom-color: #183054;
+    font-weight: 600;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  :global(.entity-item) {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  :global(.entity-info) {
+    flex: 1;
+  }
+
+  :global(.entity-info h4) {
+    margin: 0 0 4px 0;
+    color: #333;
+    font-size: 14px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  :global(.entity-info p) {
+    margin: 0 0 8px 0;
+    color: #666;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  :global(.entity-link) {
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  :global(.entity-link:hover) {
+    background: #e9ecef;
+  }
+
+  :global(.entity-link h4) {
+    color: #183054;
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('revendaModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const detailsModal = document.getElementById('detailsModal');
+    const addBtn = document.getElementById('addRevendaBtn');
+    const form = document.getElementById('revendaForm');
+    const modalTitle = modal.querySelector('.modal-title');
+    const saveBtn = modal.querySelector('.btn-save');
+    
+    let isEditing = false;
+    let editingId = null;
+    let deleteId = null;
+    let currentRevendaId = null;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewId = urlParams.get('view');
+    if (viewId) {
+      setTimeout(() => showDetails(viewId), 100);
+    }
+
+    function reloadWithoutAnimation() {
+      if (window.reloadWithoutAnimation) {
+        window.reloadWithoutAnimation();
+      } else {
+        window.location.reload();
+      }
+    }
+
+    addBtn.addEventListener('click', () => {
+      isEditing = false;
+      editingId = null;
+      modalTitle.textContent = 'Nova Revenda';
+      saveBtn.textContent = 'Salvar';
+      form.reset();
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-btn')) {
+        const btn = e.target.closest('.delete-btn');
+        deleteId = btn.getAttribute('data-item-id');
+        confirmModal.classList.add('show');
+      }
+      if (e.target.closest('.view-btn')) {
+        const btn = e.target.closest('.view-btn');
+        const id = btn.getAttribute('data-item-id');
+        showDetails(id);
+      }
+      if (e.target.matches('.tab-btn')) {
+        const tabName = e.target.getAttribute('data-tab');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+      }
+      if (e.target.closest('.entity-link')) {
+        const item = e.target.closest('.entity-link');
+        const type = item.getAttribute('data-type');
+        const id = item.getAttribute('data-id');
+        openEntityDetails(type, id);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close-modal="revendaModal"]')) {
+        closeModal();
+      }
+      if (e.target.matches('[data-confirm-cancel="confirmModal"]')) {
+        closeConfirmModal();
+      }
+      if (e.target.matches('[data-confirm-action="confirmModal"]')) {
+        confirmDelete();
+      }
+      if (e.target.matches('[data-close-details]')) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    async function confirmDelete() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/revenda-cloud/${deleteId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          confirmModal.classList.add('closing');
+          setTimeout(() => {
+            confirmModal.classList.remove('show', 'closing');
+            reloadWithoutAnimation();
+          }, 300);
+        } else {
+          alert('Erro ao excluir revenda');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function closeConfirmModal() {
+      confirmModal.classList.add('closing');
+      setTimeout(() => {
+        confirmModal.classList.remove('show', 'closing');
+        deleteId = null;
+      }, 300);
+    }
+
+    function closeModal() {
+      modal.classList.add('closing');
+      setTimeout(() => {
+        modal.classList.remove('show', 'closing');
+        modal.style.display = 'none';
+        form.reset();
+        isEditing = false;
+        editingId = null;
+      }, 300);
+    }
+
+    document.addEventListener('click', async (e) => {
+      if (e.target.closest('.edit-btn')) {
+        const btn = e.target.closest('.edit-btn');
+        const id = btn.getAttribute('data-item-id');
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/revenda-cloud/${id}`);
+          const revenda = await response.json();
+          
+          isEditing = true;
+          editingId = id;
+          modalTitle.textContent = 'Editar Revenda';
+          saveBtn.textContent = 'Atualizar';
+          
+          form.nome_fantasia.value = revenda.nome_fantasia || '';
+          form.razao_social.value = revenda.razao_social || '';
+          form.cnpj.value = revenda.cnpj || '';
+          form.telefone.value = revenda.telefone || '';
+          form.email.value = revenda.email || '';
+          
+          modal.style.display = 'flex';
+          modal.offsetHeight;
+          modal.classList.add('show');
+        } catch (error) {
+          alert('Erro ao carregar dados da revenda');
+        }
+      }
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    detailsModal.addEventListener('click', (e) => {
+      if (e.target === detailsModal) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    async function showDetails(id) {
+      try {
+        currentRevendaId = id;
+        const response = await fetch(`http://localhost:3000/api/revenda-cloud/${id}`);
+        const revenda = await response.json();
+        document.getElementById('modalTitle').textContent = `Detalhes - ${revenda.nome_fantasia}`;
+        
+        document.getElementById('nomeFantasiaText').innerHTML = `<p><strong>Nome Fantasia:</strong> ${revenda.nome_fantasia}</p>`;
+        document.getElementById('razaoSocialText').innerHTML = `<p><strong>Razão Social:</strong> ${revenda.razao_social || 'N/A'}</p>`;
+        document.getElementById('cnpjText').innerHTML = `<p><strong>CNPJ:</strong> ${revenda.cnpj || 'N/A'}</p>`;
+        document.getElementById('telefoneText').innerHTML = `<p><strong>Telefone:</strong> ${revenda.telefone || 'N/A'}</p>`;
+        document.getElementById('emailText').innerHTML = `<p><strong>Email:</strong> ${revenda.email || 'N/A'}</p>`;
+        
+        await loadPerfis(id);
+        await loadContatos(id);
+        await loadOrganizacoes(id);
+        
+        detailsModal.style.display = 'flex';
+        detailsModal.offsetHeight;
+        detailsModal.classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar detalhes');
+      }
+    }
+
+    async function loadPerfis(revendaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/perfil-cloud?revendacloud_id=${revendaId}`);
+        const data = await response.json();
+        const perfis = Array.isArray(data) ? data : (data.data || []);
+        
+        const container = document.getElementById('perfisList');
+        container.innerHTML = perfis.map(perfil => `
+          <div class="entity-item entity-link" data-type="perfil_cloud" data-id="${perfil.id}">
+            <div class="entity-info">
+              <h4>${perfil.nome}</h4>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhum perfil cadastrado</p>';
+      } catch (error) {
+        console.error('Erro ao carregar perfis:', error);
+      }
+    }
+
+    async function loadContatos(revendaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/contato-cloud?revendacloud_id=${revendaId}`);
+        const data = await response.json();
+        const contatos = Array.isArray(data) ? data : (data.data || []);
+        
+        const container = document.getElementById('contatosList');
+        container.innerHTML = contatos.map(contato => `
+          <div class="entity-item entity-link" data-type="contato_cloud" data-id="${contato.id}">
+            <div class="entity-info">
+              <h4>${contato.nome}</h4>
+              <p>Email: ${contato.email || 'N/A'}</p>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhum contato cadastrado</p>';
+      } catch (error) {
+        console.error('Erro ao carregar contatos:', error);
+      }
+    }
+
+    async function loadOrganizacoes(revendaId) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/organizacao-cloud?revenda_id=${revendaId}`);
+        const data = await response.json();
+        const organizacoes = Array.isArray(data) ? data : (data.data || []);
+        
+        const container = document.getElementById('organizacoesList');
+        container.innerHTML = organizacoes.map(org => `
+          <div class="entity-item entity-link" data-type="organizacao_cloud" data-id="${org.id}">
+            <div class="entity-info">
+              <h4>${org.nome_fantasia}</h4>
+              <p>Razão Social: ${org.razao_social || 'N/A'}</p>
+              <p>Cidade: ${org.cidade || 'N/A'}</p>
+            </div>
+          </div>
+        `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">Nenhuma organização cadastrada</p>';
+      } catch (error) {
+        console.error('Erro ao carregar organizações:', error);
+      }
+    }
+
+    function openEntityDetails(type, id) {
+      const urls = {
+        perfil_cloud: `/perfil-cloud?view=${id}`,
+        contato_cloud: `/contato-cloud?view=${id}`,
+        organizacao_cloud: `/organizacao-cloud?view=${id}`
+      };
+      
+      if (urls[type]) {
+        window.open(urls[type], '_blank');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const url = isEditing 
+          ? `http://localhost:3000/api/revenda-cloud/${editingId}`
+          : 'http://localhost:3000/api/revenda-cloud';
+        
+        const method = isEditing ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          closeModal();
+          reloadWithoutAnimation();
+        } else {
+          alert('Erro ao salvar revenda');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    });
+  });
+</script>

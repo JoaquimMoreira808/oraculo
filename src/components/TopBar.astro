@@ -19,10 +19,35 @@ const isHomePage = pathname === '/';
   </div>
   
   <nav class="nav-buttons">
-    <a href="/maquinas" class="nav-btn">Máquinas</a>
-    <a href="/empresas" class="nav-btn">Empresas</a>
-    <a href="/pessoas" class="nav-btn">Pessoas</a>
-    <a href="/chatbots" class="nav-btn">Chatbots</a>
+    <div class="dropdown-nav">
+      <button class="nav-btn dropdown-btn" id="registrosBtn">
+        Registros
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="nav-dropdown" id="registrosDropdown">
+        <a href="/empresas" class="dropdown-item">Empresas</a>
+        <a href="/maquinas" class="dropdown-item">Máquinas</a>
+        <a href="/pessoas" class="dropdown-item">Pessoas</a>
+        <a href="/chatbots" class="dropdown-item">Chatbots</a>
+      </div>
+    </div>
+    
+    <div class="dropdown-nav">
+      <button class="nav-btn dropdown-btn" id="cloudBtn">
+        Registros Cloud
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 10L12 15L17 10H7Z" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="nav-dropdown" id="cloudDropdown">
+        <a href="/revenda-cloud" class="dropdown-item">Revendas Cloud</a>
+        <a href="/perfil-cloud" class="dropdown-item">Perfis Cloud</a>
+        <a href="/contato-cloud" class="dropdown-item">Contatos Cloud</a>
+        <a href="/organizacao-cloud" class="dropdown-item">Organizações Cloud</a>
+      </div>
+    </div>
   </nav>
   
   <div class="user-menu">
@@ -108,6 +133,50 @@ const isHomePage = pathname === '/';
   .nav-buttons {
     display: flex;
     gap: 12px;
+  }
+
+  .dropdown-nav {
+    position: relative;
+  }
+
+  .dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 1000;
+    margin-top: 8px;
+  }
+
+  .nav-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 20px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    transform: rotate(45deg);
+    box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
   }
 
   .nav-btn {
@@ -221,18 +290,47 @@ const isHomePage = pathname === '/';
     const userButton = document.getElementById('userButton');
     const dropdown = document.getElementById('dropdown');
     const searchInput = document.getElementById('topbar-search-input');
+    const registrosBtn = document.getElementById('registrosBtn');
+    const registrosDropdown = document.getElementById('registrosDropdown');
+    const cloudBtn = document.getElementById('cloudBtn');
+    const cloudDropdown = document.getElementById('cloudDropdown');
 
+    // Dropdown de usuário
     userButton?.addEventListener('click', (e) => {
       e.stopPropagation();
       dropdown?.classList.toggle('show');
+      registrosDropdown?.classList.remove('show');
+      cloudDropdown?.classList.remove('show');
     });
 
+    // Dropdown de registros
+    registrosBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      registrosDropdown?.classList.toggle('show');
+      dropdown?.classList.remove('show');
+      cloudDropdown?.classList.remove('show');
+    });
+
+    // Dropdown de cloud
+    cloudBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cloudDropdown?.classList.toggle('show');
+      dropdown?.classList.remove('show');
+      registrosDropdown?.classList.remove('show');
+    });
+
+    // Fechar dropdowns ao clicar fora
     document.addEventListener('click', () => {
       dropdown?.classList.remove('show');
+      registrosDropdown?.classList.remove('show');
+      cloudDropdown?.classList.remove('show');
     });
 
-    dropdown?.addEventListener('click', (e) => {
-      e.stopPropagation();
+    // Prevenir fechamento ao clicar dentro dos dropdowns
+    [dropdown, registrosDropdown, cloudDropdown].forEach(el => {
+      el?.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
     });
 
     // Funcionalidade de pesquisa

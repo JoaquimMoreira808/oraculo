@@ -87,6 +87,55 @@ router.get('/:type/:id', async (req, res) => {
           results.push(...relatedEquipamentos, ...relatedLinhas);
         }
         break;
+
+      case 'revenda_cloud':
+        const [perfisCloud] = await db.query(
+          `SELECT id, nome, 'perfil_cloud' as type FROM perfil_cloud WHERE revendacloud_id = ? AND is_active = 'T'`,
+          [id]
+        );
+        const [contatosCloud] = await db.query(
+          `SELECT id, nome, email, 'contato_cloud' as type FROM contato_cloud WHERE revendacloud_id = ? AND is_active = 'T'`,
+          [id]
+        );
+        const [organizacoesCloud] = await db.query(
+          `SELECT id, nome_fantasia as nome, razao_social, 'organizacao_cloud' as type FROM organizacao_cloud WHERE revenda_id = ? AND is_active = 'T'`,
+          [id]
+        );
+        results.push(...perfisCloud, ...contatosCloud, ...organizacoesCloud);
+        break;
+
+      case 'perfil_cloud':
+        const [perfilCloud] = await db.query(`SELECT revendacloud_id FROM perfil_cloud WHERE id = ?`, [id]);
+        if (perfilCloud[0]?.revendacloud_id) {
+          const [relatedContatos] = await db.query(
+            `SELECT id, nome, email, 'contato_cloud' as type FROM contato_cloud WHERE perfil_id = ? AND is_active = 'T'`,
+            [id]
+          );
+          results.push(...relatedContatos);
+        }
+        break;
+
+      case 'contato_cloud':
+        const [contatoCloud] = await db.query(`SELECT revendacloud_id, perfil_id FROM contato_cloud WHERE id = ?`, [id]);
+        if (contatoCloud[0]?.revendacloud_id) {
+          const [relatedContatosCloud] = await db.query(
+            `SELECT id, nome, email, 'contato_cloud' as type FROM contato_cloud WHERE revendacloud_id = ? AND id != ? AND is_active = 'T'`,
+            [contatoCloud[0].revendacloud_id, id]
+          );
+          results.push(...relatedContatosCloud);
+        }
+        break;
+
+      case 'organizacao_cloud':
+        const [organizacaoCloud] = await db.query(`SELECT revenda_id FROM organizacao_cloud WHERE id = ?`, [id]);
+        if (organizacaoCloud[0]?.revenda_id) {
+          const [relatedOrganizacoes] = await db.query(
+            `SELECT id, nome_fantasia as nome, razao_social, 'organizacao_cloud' as type FROM organizacao_cloud WHERE revenda_id = ? AND id != ? AND is_active = 'T'`,
+            [organizacaoCloud[0].revenda_id, id]
+          );
+          results.push(...relatedOrganizacoes);
+        }
+        break;
     }
 
     res.json(results);
