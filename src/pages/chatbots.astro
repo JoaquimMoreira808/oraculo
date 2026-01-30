@@ -28,6 +28,7 @@ const { data: chatbots, pagination } = chatbotsResult;
   <TopBar />
   <main>
     <div class="header">
+      <h1 class="page-title">Chatbots</h1>
       <AddButton text="Novo Chatbot" id="addChatbotBtn" />
     </div>
     
@@ -157,6 +158,8 @@ const { data: chatbots, pagination } = chatbotsResult;
     max-width: 1400px;
     margin: 0 auto;
     animation: fadeInScale 0.4s ease-out;
+    position: relative;
+    z-index: 1;
   }
 
   @keyframes fadeInScale {
@@ -172,9 +175,19 @@ const { data: chatbots, pagination } = chatbotsResult;
 
   .header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-title {
+    margin: 0;
+    color: #333;
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'Arimo', sans-serif;
   }
 
   .checkbox-group {

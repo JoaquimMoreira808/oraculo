@@ -28,6 +28,7 @@ const { data: maquinas, pagination } = maquinasResult;
   <TopBar />
   <main>
     <div class="header">
+      <h1 class="page-title">Máquinas</h1>
       <AddButton text="Nova Máquina" id="addMaquinaBtn" />
     </div>
     
@@ -193,6 +194,8 @@ const { data: maquinas, pagination } = maquinasResult;
     max-width: 1400px;
     margin: 0 auto;
     animation: fadeInScale 0.4s ease-out;
+    position: relative;
+    z-index: 1;
   }
 
   @keyframes fadeInScale {
@@ -208,9 +211,19 @@ const { data: maquinas, pagination } = maquinasResult;
 
   .header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-title {
+    margin: 0;
+    color: #333;
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'Arimo', sans-serif;
   }
 
   .modal {
