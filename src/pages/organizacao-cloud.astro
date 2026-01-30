@@ -1,1 +1,454 @@
----\nimport Layout from '../layouts/Layout.astro';\nimport DataTable from '../components/DataTable.astro';\nimport TopBar from '../components/TopBar.astro';\n---\n\n<Layout title=\"Organizações Cloud\">\n  <TopBar />\n  <main>\n    <DataTable \n      title=\"Organizações Cloud\"\n      endpoint=\"/api/organizacao-cloud\"\n      columns={[\n        { key: 'id', label: 'ID', width: '80px' },\n        { key: 'nome_fantasia', label: 'Nome Fantasia', width: '200px' },\n        { key: 'razao_social', label: 'Razão Social', width: '250px' },\n        { key: 'cnpj', label: 'CNPJ', width: '150px' },\n        { key: 'cidade', label: 'Cidade', width: '150px' },\n        { key: 'revenda_nome', label: 'Revenda', width: '180px' }\n      ]}\n      fields={[\n        { name: 'nome_fantasia', label: 'Nome Fantasia', type: 'text', required: true },\n        { name: 'razao_social', label: 'Razão Social', type: 'text', required: true },\n        { name: 'cnpj', label: 'CNPJ', type: 'text' },\n        { name: 'telefone', label: 'Telefone', type: 'text' },\n        { name: 'email', label: 'Email', type: 'email' },\n        { name: 'cep', label: 'CEP', type: 'text' },\n        { name: 'cidade', label: 'Cidade', type: 'text' },\n        { \n          name: 'revenda_id', \n          label: 'Revenda Cloud', \n          type: 'select', \n          required: true,\n          endpoint: '/api/revenda-cloud',\n          valueKey: 'id',\n          labelKey: 'nome_fantasia'\n        }\n      ]}\n    />\n  </main>\n</Layout>
+---
+import TopBar from '../components/TopBar.astro';
+import Layout from '../layouts/Layout.astro';
+import DataTable from '../components/DataTable.astro';
+import ViewButton from '../components/ViewButton.astro';
+import EditButton from '../components/EditButton.astro';
+import DeleteButton from '../components/DeleteButton.astro';
+import AddButton from '../components/AddButton.astro';
+import Modal from '../components/Modal.astro';
+import FormField from '../components/FormField.astro';
+import ConfirmModal from '../components/ConfirmModal.astro';
+import SelectField from '../components/SelectField.astro';
+import { fetchPaginatedData, fetchApiData } from '../lib/api.js';
+
+export const prerender = false;
+
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const limit = 10;
+
+const [organizacoesResult, revendas] = await Promise.all([
+  fetchPaginatedData('organizacao-cloud', page, limit),
+  fetchApiData('revenda-cloud')
+]);
+
+const { data: organizacoes, pagination } = organizacoesResult;
+---
+
+<Layout>
+  <TopBar />
+  <main>
+    <div class="header">
+      <h1 class="page-title">Organizações Cloud</h1>
+      <AddButton text="Nova Organização" id="addOrganizacaoBtn" />
+    </div>
+    
+    <DataTable 
+      columns={['Nome Fantasia', 'Razão Social', 'CNPJ', 'Cidade', 'Revenda']} 
+      data={organizacoes}
+      pagination={pagination}
+      entityName="organizacao-cloud"
+    >
+      {organizacoes.map((org) => (
+        <tr>
+          <td>{org.nome_fantasia}</td>
+          <td>{org.razao_social}</td>
+          <td>{org.cnpj || '-'}</td>
+          <td>{org.cidade || '-'}</td>
+          <td>{org.revenda_nome || '-'}</td>
+          <td>
+            <div class="action-buttons">
+              <ViewButton itemId={org.id} />
+              <EditButton itemId={org.id} />
+              <DeleteButton itemId={org.id} />
+            </div>
+          </td>
+        </tr>
+      ))}
+    </DataTable>
+  </main>
+
+  <Modal id="organizacaoModal" title="Nova Organização" formId="organizacaoForm">
+    <FormField label="Nome Fantasia" name="nome_fantasia" required />
+    <FormField label="Razão Social" name="razao_social" required />
+    <FormField label="CNPJ" name="cnpj" />
+    <FormField label="Telefone" name="telefone" />
+    <FormField label="Email" name="email" type="email" />
+    <FormField label="CEP" name="cep" />
+    <FormField label="Cidade" name="cidade" />
+    <SelectField 
+      label="Revenda Cloud" 
+      name="revenda_id" 
+      required 
+      options={revendas.map(r => ({value: r.id, text: r.nome_fantasia}))}
+    />
+  </Modal>
+
+  <ConfirmModal 
+    id="confirmModal" 
+    title="Tem certeza que deseja excluir esta organização?" 
+    warning="Esse arquivo será perdido pra sempre! (Muito tempo)"
+    confirmText="Excluir"
+  />
+
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-details>&times;</button>
+      <h2 id="modalTitle">Detalhes da Organização</h2>
+      
+      <div class="details-stack">
+        <div class="detail-item" id="nomeFantasiaText"></div>
+        <div class="detail-item" id="razaoSocialText"></div>
+        <div class="detail-item" id="cnpjText"></div>
+        <div class="detail-item" id="telefoneText"></div>
+        <div class="detail-item" id="emailText"></div>
+        <div class="detail-item" id="cepText"></div>
+        <div class="detail-item" id="cidadeText"></div>
+        <div class="detail-item" id="revendaText"></div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  main {
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInScale 0.4s ease-out;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-title {
+    margin: 0;
+    color: #333;
+    font-size: 28px;
+    font-weight: 600;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  #modalTitle {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+    font-size: 24px;
+  }
+
+  .details-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .detail-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 6px;
+  }
+
+  .detail-item p {
+    margin: 0;
+    color: #333;
+    font-size: 12px;
+    font-family: 'Arimo', sans-serif;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('organizacaoModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const detailsModal = document.getElementById('detailsModal');
+    const addBtn = document.getElementById('addOrganizacaoBtn');
+    const form = document.getElementById('organizacaoForm');
+    const modalTitle = modal.querySelector('.modal-title');
+    const saveBtn = modal.querySelector('.btn-save');
+    
+    let isEditing = false;
+    let editingId = null;
+    let deleteId = null;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewId = urlParams.get('view');
+    if (viewId) {
+      setTimeout(() => showDetails(viewId), 100);
+    }
+
+    function reloadWithoutAnimation() {
+      if (window.reloadWithoutAnimation) {
+        window.reloadWithoutAnimation();
+      } else {
+        window.location.reload();
+      }
+    }
+
+    addBtn.addEventListener('click', () => {
+      isEditing = false;
+      editingId = null;
+      modalTitle.textContent = 'Nova Organização';
+      saveBtn.textContent = 'Salvar';
+      form.reset();
+      modal.style.display = 'flex';
+      modal.offsetHeight;
+      modal.classList.add('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-btn')) {
+        const btn = e.target.closest('.delete-btn');
+        deleteId = btn.getAttribute('data-item-id');
+        confirmModal.classList.add('show');
+      }
+      if (e.target.closest('.view-btn')) {
+        const btn = e.target.closest('.view-btn');
+        const id = btn.getAttribute('data-item-id');
+        showDetails(id);
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close-modal="organizacaoModal"]')) {
+        closeModal();
+      }
+      if (e.target.matches('[data-confirm-cancel="confirmModal"]')) {
+        closeConfirmModal();
+      }
+      if (e.target.matches('[data-confirm-action="confirmModal"]')) {
+        confirmDelete();
+      }
+      if (e.target.matches('[data-close-details]')) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    async function confirmDelete() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/organizacao-cloud/${deleteId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          confirmModal.classList.add('closing');
+          setTimeout(() => {
+            confirmModal.classList.remove('show', 'closing');
+            reloadWithoutAnimation();
+          }, 300);
+        } else {
+          alert('Erro ao excluir organização');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    }
+
+    function closeConfirmModal() {
+      confirmModal.classList.add('closing');
+      setTimeout(() => {
+        confirmModal.classList.remove('show', 'closing');
+        deleteId = null;
+      }, 300);
+    }
+
+    function closeModal() {
+      modal.classList.add('closing');
+      setTimeout(() => {
+        modal.classList.remove('show', 'closing');
+        modal.style.display = 'none';
+        form.reset();
+        isEditing = false;
+        editingId = null;
+      }, 300);
+    }
+
+    document.addEventListener('click', async (e) => {
+      if (e.target.closest('.edit-btn')) {
+        const btn = e.target.closest('.edit-btn');
+        const id = btn.getAttribute('data-item-id');
+        
+        try {
+          const response = await fetch(`http://localhost:3000/api/organizacao-cloud/${id}`);
+          const org = await response.json();
+          
+          isEditing = true;
+          editingId = id;
+          modalTitle.textContent = 'Editar Organização';
+          saveBtn.textContent = 'Atualizar';
+          
+          form.nome_fantasia.value = org.nome_fantasia || '';
+          form.razao_social.value = org.razao_social || '';
+          form.cnpj.value = org.cnpj || '';
+          form.telefone.value = org.telefone || '';
+          form.email.value = org.email || '';
+          form.cep.value = org.cep || '';
+          form.cidade.value = org.cidade || '';
+          form.revenda_id.value = org.revenda_id || '';
+          
+          modal.style.display = 'flex';
+          modal.offsetHeight;
+          modal.classList.add('show');
+        } catch (error) {
+          alert('Erro ao carregar dados da organização');
+        }
+      }
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeConfirmModal();
+    });
+
+    detailsModal.addEventListener('click', (e) => {
+      if (e.target === detailsModal) {
+        detailsModal.classList.add('closing');
+        setTimeout(() => {
+          detailsModal.classList.remove('show', 'closing');
+          detailsModal.style.display = 'none';
+        }, 300);
+      }
+    });
+
+    async function showDetails(id) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/organizacao-cloud/${id}`);
+        const org = await response.json();
+        
+        // Buscar dados da revenda
+        const revendaResponse = await fetch(`http://localhost:3000/api/revenda-cloud/${org.revenda_id}`);
+        const revenda = await revendaResponse.json();
+        
+        document.getElementById('modalTitle').textContent = `Detalhes - ${org.nome_fantasia}`;
+        
+        document.getElementById('nomeFantasiaText').innerHTML = `<p><strong>Nome Fantasia:</strong> ${org.nome_fantasia}</p>`;
+        document.getElementById('razaoSocialText').innerHTML = `<p><strong>Razão Social:</strong> ${org.razao_social}</p>`;
+        document.getElementById('cnpjText').innerHTML = `<p><strong>CNPJ:</strong> ${org.cnpj || 'N/A'}</p>`;
+        document.getElementById('telefoneText').innerHTML = `<p><strong>Telefone:</strong> ${org.telefone || 'N/A'}</p>`;
+        document.getElementById('emailText').innerHTML = `<p><strong>Email:</strong> ${org.email || 'N/A'}</p>`;
+        document.getElementById('cepText').innerHTML = `<p><strong>CEP:</strong> ${org.cep || 'N/A'}</p>`;
+        document.getElementById('cidadeText').innerHTML = `<p><strong>Cidade:</strong> ${org.cidade || 'N/A'}</p>`;
+        document.getElementById('revendaText').innerHTML = `<p><strong>Revenda:</strong> ${revenda.nome_fantasia || 'N/A'}</p>`;
+        
+        detailsModal.style.display = 'flex';
+        detailsModal.offsetHeight;
+        detailsModal.classList.add('show');
+      } catch (error) {
+        alert('Erro ao carregar detalhes');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+      
+      try {
+        const url = isEditing 
+          ? `http://localhost:3000/api/organizacao-cloud/${editingId}`
+          : 'http://localhost:3000/api/organizacao-cloud';
+        
+        const method = isEditing ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+          closeModal();
+          reloadWithoutAnimation();
+        } else {
+          alert('Erro ao salvar organização');
+        }
+      } catch (error) {
+        alert('Erro de conexão');
+      }
+    });
+  });
+</script>
