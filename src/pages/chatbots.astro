@@ -367,35 +367,44 @@ const { data: chatbots, pagination } = chatbotsResult;
     background: #0f1f35;
   }
 
-  .entity-item {
+  :global(.entity-list) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  :global(.entity-item) {
     background: #f8f9fa;
     border: 1px solid #e9ecef;
     border-radius: 6px;
     padding: 12px;
-    margin-bottom: 8px;
   }
 
-  .entity-info h4 {
+  :global(.entity-info) {
+    flex: 1;
+  }
+
+  :global(.entity-info h4) {
     margin: 0 0 4px 0;
     color: #333;
     font-size: 14px;
     font-family: 'Arimo', sans-serif;
   }
 
-  .entity-info p {
+  :global(.entity-info p) {
     margin: 0 0 8px 0;
     color: #666;
     font-size: 12px;
     font-family: 'Arimo', sans-serif;
   }
 
-  .entity-actions {
+  :global(.entity-actions) {
     display: flex;
     gap: 8px;
     justify-content: flex-start;
   }
 
-  .btn-edit, .btn-delete {
+  :global(.btn-edit), :global(.btn-delete) {
     background: rgba(24, 48, 84, 0.1);
     color: #183054;
     border: none;
@@ -407,19 +416,24 @@ const { data: chatbots, pagination } = chatbotsResult;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
   }
 
-  .btn-delete {
+  :global(.btn-delete) {
     background: rgba(245, 66, 87, 0.1);
     color: #f54257;
   }
 
-  .btn-edit:hover {
+  :global(.btn-edit:hover) {
     background: rgba(24, 48, 84, 0.2);
   }
 
-  .btn-delete:hover {
+  :global(.btn-delete:hover) {
     background: rgba(245, 66, 87, 0.2);
+  }
+
+  :global(.btn-edit:active), :global(.btn-delete:active) {
+    transform: scale(0.95);
   }
 </style>
 
