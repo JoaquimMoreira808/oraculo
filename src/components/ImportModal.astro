@@ -1,0 +1,394 @@
+---
+interface Props {
+  id: string;
+  title: string;
+  templateUrl?: string;
+  importType: string;
+}
+
+const { id, title, templateUrl, importType } = Astro.props;
+---
+
+<div id={id} class="modal">
+  <div class="modal-content">
+    <button class="modal-close" data-close-import>&times;</button>
+    <h2 class="modal-title">{title}</h2>
+    
+    {templateUrl && (
+      <a href={templateUrl} download class="btn-template">Baixar Template</a>
+    )}
+    
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-content">
+        <div class="upload-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14,2 14,8 20,8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10,9 9,9 8,9"></polyline>
+          </svg>
+        </div>
+        <p>Arraste o arquivo aqui ou clique para selecionar</p>
+        <p class="file-types">Formatos aceitos: .xlsx, .csv</p>
+      </div>
+      <input type="file" id="fileInput" accept=".xlsx,.csv" hidden>
+    </div>
+    
+    <div class="file-info" id="fileInfo" style="display: none;">
+      <div class="file-details">
+        <span class="file-name" id="fileName"></span>
+        <span class="file-size" id="fileSize"></span>
+      </div>
+      <button class="remove-file" id="removeFile">&times;</button>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="btn-cancel" data-close-import>Cancelar</button>
+      <button class="btn-import" id="importBtn" data-import-type={importType} disabled>Importar</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal.closing {
+    opacity: 0;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .modal.closing .modal-content {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+  }
+
+  .modal-close:hover {
+    color: #333;
+  }
+
+  .modal-title {
+    margin: 0 0 24px 0;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+    font-size: 24px;
+  }
+
+  .btn-template {
+    position: absolute;
+    top: 32px;
+    right: 60px;
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-family: 'Arimo', sans-serif;
+    font-size: 12px;
+    transition: background-color 0.2s;
+  }
+
+  .btn-template:hover {
+    background: #5a6268;
+  }
+
+  .upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    margin-bottom: 20px;
+  }
+
+  .upload-area:hover {
+    border-color: #28a745;
+  }
+
+  .upload-area.dragover {
+    border-color: #28a745;
+    background: #f8f9fa;
+  }
+
+  .upload-content {
+    pointer-events: none;
+  }
+
+  .upload-icon {
+    margin-bottom: 16px;
+    color: #666;
+  }
+
+  .upload-content p {
+    margin: 8px 0;
+    color: #666;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .file-types {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .file-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+
+  .file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .file-name {
+    font-weight: 500;
+    color: #333;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .file-size {
+    font-size: 12px;
+    color: #666;
+    font-family: 'Arimo', sans-serif;
+  }
+
+  .remove-file {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #dc3545;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+
+  .remove-file:hover {
+    color: #c82333;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel, .btn-import {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Arimo', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .btn-cancel {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-cancel:hover {
+    background: #5a6268;
+  }
+
+  .btn-import {
+    background: #28a745;
+    color: white;
+  }
+
+  .btn-import:hover:not(:disabled) {
+    background: #218838;
+  }
+
+  .btn-import:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('importModal');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFile = document.getElementById('removeFile');
+    const importBtn = document.getElementById('importBtn');
+    
+    let selectedFile = null;
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function showFile(file) {
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileSize.textContent = formatFileSize(file.size);
+      fileInfo.style.display = 'flex';
+      uploadArea.style.display = 'none';
+      importBtn.disabled = false;
+    }
+
+    function hideFile() {
+      selectedFile = null;
+      fileInfo.style.display = 'none';
+      uploadArea.style.display = 'block';
+      importBtn.disabled = true;
+      fileInput.value = '';
+    }
+
+    uploadArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.csv')) {
+          showFile(file);
+        } else {
+          alert('Formato de arquivo não suportado. Use .xlsx ou .csv');
+        }
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        showFile(file);
+      }
+    });
+
+    removeFile.addEventListener('click', hideFile);
+
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('[data-close-import]')) {
+        modal.classList.add('closing');
+        setTimeout(() => {
+          modal.classList.remove('show', 'closing');
+          modal.style.display = 'none';
+          hideFile();
+        }, 300);
+      }
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.add('closing');
+        setTimeout(() => {
+          modal.classList.remove('show', 'closing');
+          modal.style.display = 'none';
+          hideFile();
+        }, 300);
+      }
+    });
+
+    importBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      
+      importBtn.disabled = true;
+      importBtn.textContent = 'Importando...';
+      
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      
+      const importType = importBtn.getAttribute('data-import-type');
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/import/${importType}`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          window.showImportAlert({ success: result.message });
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          window.showImportAlert({ success: 0, error: result.error });
+        }
+      } catch (error) {
+        window.showImportAlert({ success: 0, error: `Erro de conexão: ${error.message}` });
+      } finally {
+        importBtn.disabled = false;
+        importBtn.textContent = 'Importar';
+      }
+    });
+  });
+</script>
