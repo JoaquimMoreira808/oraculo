@@ -1,19 +1,36 @@
 {
-  "name": "",
-  "type": "module",
-  "version": "0.0.1",
+  "name": "invent",
+  "version": "1.0.0",
+  "description": "Sistema de Inventário - Astro + Express",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "start": "node server.js",
+    "docker:build": "docker-compose build --no-cache",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down -v",
+    "docker:logs": "docker-compose logs -f app",
+    "docker:restart": "npm run docker:down && npm run docker:up",
+    "db:seed": "node scripts/seed.cjs"
   },
   "dependencies": {
     "astro": "^5.16.15",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
-    "mysql2": "^3.16.2"
+    "express": "^5.2.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.16.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "tsx": "^4.19.2"
-  }
+  },
+  "keywords": ["inventory", "astro", "express", "mysql"],
+  "author": "",
+  "license": "MIT"
 }

@@ -6,7 +6,10 @@ import ViewButton from '../components/ViewButton.astro';
 import EditButton from '../components/EditButton.astro';
 import DeleteButton from '../components/DeleteButton.astro';
 import AddButton from '../components/AddButton.astro';
+import ImportButton from '../components/ImportButton.astro';
 import Modal from '../components/Modal.astro';
+import ImportModal from '../components/ImportModal.astro';
+import ImportAlert from '../components/ImportAlert.astro';
 import FormField from '../components/FormField.astro';
 import ConfirmModal from '../components/ConfirmModal.astro';
 import SelectField from '../components/SelectField.astro';
@@ -30,7 +33,10 @@ const { data: perfils, pagination } = perfilsResult;
   <main>
     <div class="header">
       <h1 class="page-title">Perfis Cloud</h1>
-      <AddButton text="Novo Perfil" id="addPerfilBtn" />
+      <div class="header-buttons">
+        <AddButton text="Novo Perfil" id="addPerfilBtn" />
+        <ImportButton text="Perfis" id="importPerfilBtn" />
+      </div>
     </div>
     
     <DataTable 
@@ -71,6 +77,10 @@ const { data: perfils, pagination } = perfilsResult;
     warning="Esse arquivo será perdido pra sempre! (Muito tempo)"
     confirmText="Excluir"
   />
+
+  <ImportModal id="importModal" title="Importar Perfis" templateUrl="/templates/perfil_cloud_template.csv" importType="perfil-cloud" />
+
+  <ImportAlert id="importAlert" />
 
   <div id="detailsModal" class="modal">
     <div class="modal-content">
@@ -113,6 +123,11 @@ const { data: perfils, pagination } = perfilsResult;
     margin-bottom: 24px;
     position: relative;
     z-index: 1;
+  }
+
+  .header-buttons {
+    display: flex;
+    align-items: center;
   }
 
   .page-title {
@@ -219,9 +234,11 @@ const { data: perfils, pagination } = perfilsResult;
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('perfilModal');
+    const importModal = document.getElementById('importModal');
     const confirmModal = document.getElementById('confirmModal');
     const detailsModal = document.getElementById('detailsModal');
     const addBtn = document.getElementById('addPerfilBtn');
+    const importBtn = document.getElementById('importPerfilBtn');
     const form = document.getElementById('perfilForm');
     const modalTitle = modal.querySelector('.modal-title');
     const saveBtn = modal.querySelector('.btn-save');
@@ -253,6 +270,12 @@ const { data: perfils, pagination } = perfilsResult;
       modal.style.display = 'flex';
       modal.offsetHeight;
       modal.classList.add('show');
+    });
+
+    importBtn.addEventListener('click', () => {
+      importModal.style.display = 'flex';
+      importModal.offsetHeight;
+      importModal.classList.add('show');
     });
 
     document.addEventListener('click', (e) => {

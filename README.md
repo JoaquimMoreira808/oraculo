@@ -1,46 +1,77 @@
-# Astro Starter Kit: Basics
+# Invent - Sistema de Inventário
 
-```sh
-npm create astro@latest -- --template basics
+Sistema híbrido com Astro (frontend) + Express (API) em container único.
+
+## 🚀 Início Rápido
+
+### Desenvolvimento Local
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar desenvolvimento
+./dev.sh
+# ou
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Produção com Docker
+```bash
+# Subir aplicação completa
+npm run docker:up
 
-## 🚀 Project Structure
+# Ver logs
+npm run docker:logs
 
-Inside of your Astro project, you'll see the following folders and files:
+# Parar aplicação
+npm run docker:down
+```
 
-```text
+## 📁 Estrutura Otimizada
+
+```
 /
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+├── src/                    # Frontend Astro
+│   ├── api/               # Centralizador de APIs
+│   ├── components/        # Componentes Astro
+│   ├── layouts/          # Layouts
+│   ├── pages/            # Páginas
+│   └── lib/              # Utilitários
+├── backend/              # Lógica de negócio
+│   ├── routes/           # Rotas da API
+│   ├── services/         # Serviços
+│   ├── middleware/       # Middlewares
+│   └── db/              # Conexão DB
+├── database/             # Scripts SQL
+├── public/              # Arquivos estáticos
+├── uploads/             # Uploads (Docker volume)
+├── docker-compose.yml   # Orquestração
+├── Dockerfile          # Container único
+└── server.js           # Servidor híbrido
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 🔧 Comandos Disponíveis
 
-## 🧞 Commands
+- `npm run dev` - Desenvolvimento
+- `npm run build` - Build produção
+- `npm start` - Iniciar produção
+- `npm run docker:build` - Build Docker
+- `npm run docker:up` - Subir containers
+- `npm run docker:down` - Parar containers
 
-All commands are run from the root of the project, from a terminal:
+## 🐳 Docker
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+O projeto roda em **container único** com:
+- Astro build servido estaticamente
+- Express API na mesma porta
+- MySQL em container separado
+- Volume persistente para uploads
 
-## 👀 Want to learn more?
+## 📊 Melhorias Aplicadas
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+✅ **Container único** - Elimina processos órfãos  
+✅ **Estrutura consolidada** - APIs centralizadas  
+✅ **Dependências unificadas** - Um package.json  
+✅ **Configuração simplificada** - Variáveis otimizadas  
+✅ **Docker-ready** - Pronto para produção  
+✅ **Scripts otimizados** - Comandos simplificados

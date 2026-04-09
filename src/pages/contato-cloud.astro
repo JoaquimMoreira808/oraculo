@@ -6,7 +6,10 @@ import ViewButton from '../components/ViewButton.astro';
 import EditButton from '../components/EditButton.astro';
 import DeleteButton from '../components/DeleteButton.astro';
 import AddButton from '../components/AddButton.astro';
+import ImportButton from '../components/ImportButton.astro';
 import Modal from '../components/Modal.astro';
+import ImportModal from '../components/ImportModal.astro';
+import ImportAlert from '../components/ImportAlert.astro';
 import FormField from '../components/FormField.astro';
 import ConfirmModal from '../components/ConfirmModal.astro';
 import SelectField from '../components/SelectField.astro';
@@ -31,7 +34,10 @@ const { data: contatos, pagination } = contatosResult;
   <main>
     <div class="header">
       <h1 class="page-title">Contatos Cloud</h1>
-      <AddButton text="Novo Contato" id="addContatoBtn" />
+      <div class="header-buttons">
+        <AddButton text="Novo Contato" id="addContatoBtn" />
+        <ImportButton text="Contatos" id="importContatoBtn" />
+      </div>
     </div>
     
     <DataTable 
@@ -83,6 +89,10 @@ const { data: contatos, pagination } = contatosResult;
     confirmText="Excluir"
   />
 
+  <ImportModal id="importModal" title="Importar Contatos" templateUrl="/templates/contato_cloud_template.csv" importType="contato-cloud" />
+
+  <ImportAlert id="importAlert" />
+
   <div id="detailsModal" class="modal">
     <div class="modal-content">
       <button class="modal-close" data-close-details>&times;</button>
@@ -126,6 +136,11 @@ const { data: contatos, pagination } = contatosResult;
     margin-bottom: 24px;
     position: relative;
     z-index: 1;
+  }
+
+  .header-buttons {
+    display: flex;
+    align-items: center;
   }
 
   .page-title {
@@ -232,9 +247,11 @@ const { data: contatos, pagination } = contatosResult;
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('contatoModal');
+    const importModal = document.getElementById('importModal');
     const confirmModal = document.getElementById('confirmModal');
     const detailsModal = document.getElementById('detailsModal');
     const addBtn = document.getElementById('addContatoBtn');
+    const importBtn = document.getElementById('importContatoBtn');
     const form = document.getElementById('contatoForm');
     const modalTitle = modal.querySelector('.modal-title');
     const saveBtn = modal.querySelector('.btn-save');
@@ -266,6 +283,12 @@ const { data: contatos, pagination } = contatosResult;
       modal.style.display = 'flex';
       modal.offsetHeight;
       modal.classList.add('show');
+    });
+
+    importBtn.addEventListener('click', () => {
+      importModal.style.display = 'flex';
+      importModal.offsetHeight;
+      importModal.classList.add('show');
     });
 
     document.addEventListener('click', (e) => {

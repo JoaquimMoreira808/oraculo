@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../db/connection');
+const db = require('../config/db/connection');
 const router = express.Router();
 
 // GET /search?q=termo&type=entidade
