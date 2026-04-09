@@ -6,11 +6,6 @@
  */
 export async function fetchApiData(endpoint, options = {}) {
   try {
-    // Durante build-time, retorna array vazio
-    if (typeof window === 'undefined') {
-      return [];
-    }
-    
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
     const url = `${baseUrl}/api/${endpoint}`;
     
@@ -52,13 +47,10 @@ export async function fetchApiData(endpoint, options = {}) {
  */
 export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options = {}) {
   try {
-    // Durante build-time, retorna estrutura vazia
-    if (typeof window === 'undefined') {
-      return { data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
-    }
-    
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
     const url = `${baseUrl}/api/${endpoint}?page=${page}&limit=${limit}`;
+    
+    console.log('Fazendo fetch para:', url);
     
     const response = await fetch(url, options);
     
@@ -68,6 +60,7 @@ export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options
     }
     
     const result = await response.json();
+    console.log('Resultado da API:', { dataLength: result.data?.length, pagination: result.pagination });
     
     // Se tem estrutura de paginação, retorna os dados e paginação
     if (result && typeof result === 'object' && result.data) {
