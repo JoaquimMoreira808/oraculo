@@ -6,6 +6,11 @@
  */
 export async function fetchApiData(endpoint, options = {}) {
   try {
+    // Durante build-time, retorna array vazio
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
     const url = `${baseUrl}/api/${endpoint}`;
     
@@ -47,6 +52,11 @@ export async function fetchApiData(endpoint, options = {}) {
  */
 export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options = {}) {
   try {
+    // Durante build-time, retorna estrutura vazia
+    if (typeof window === 'undefined') {
+      return { data: [], pagination: { page: 1, limit, total: 0, totalPages: 0 } };
+    }
+    
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
     const url = `${baseUrl}/api/${endpoint}?page=${page}&limit=${limit}`;
     

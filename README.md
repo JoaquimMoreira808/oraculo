@@ -9,9 +9,10 @@ Sistema híbrido com Astro (frontend) + Express (API) em container único.
 # Instalar dependências
 npm install
 
+# Usar env local para desenvolvimento
+cp .env.local .env
+
 # Iniciar desenvolvimento
-./dev.sh
-# ou
 npm run dev
 ```
 
