@@ -46,52 +46,101 @@ const { columns, data, renderActions = true, pagination, entityName = 'itens' } 
 
 <style>
   .table-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: var(--bg-card);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
     animation: var(--table-animation);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Aplicar scrollbar personalizada para tabelas */
+  .table-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: var(--bg-card);
+    border-radius: 3px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 3px;
+    transition: all var(--transition-fast);
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--silver-muted);
+  }
+
+  .table-container::-webkit-scrollbar-corner {
+    background: var(--bg-card);
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    font-family: 'Arimo', sans-serif;
+    font-family: inherit;
   }
 
   thead {
-    background: #f8f9fa;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-primary);
   }
 
   th {
-    text-align: center;
-    padding: 16px;
+    text-align: left;
+    padding: var(--space-lg) var(--space-md);
     font-weight: 600;
-    color: #333;
-    font-size: 14px;
-    border-bottom: 2px solid #e9ecef;
+    color: var(--text-primary);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+  }
+
+  th:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 20px;
+    background: var(--border-primary);
   }
 
   :global(td) {
-    padding: 16px;
-    color: #666;
+    padding: var(--space-lg) var(--space-md);
+    color: var(--text-secondary);
     font-size: 14px;
-    border-bottom: 1px solid #e9ecef;
-    text-align: center;
+    border-bottom: 1px solid var(--border-primary);
+    text-align: left;
+    transition: all var(--transition-fast);
   }
 
   :global(tbody tr) {
-    background: white;
+    background: var(--bg-card);
+    transition: all var(--transition-fast);
   }
 
   :global(tbody tr:hover) {
-    background: #f8f9fa;
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  :global(tbody tr:hover td) {
+    color: var(--text-primary);
   }
 
   :global(.action-buttons) {
     display: flex;
-    gap: 8px;
-    justify-content: center;
+    gap: var(--space-xs);
+    justify-content: flex-start;
     align-items: center;
   }
 
@@ -99,29 +148,33 @@ const { columns, data, renderActions = true, pagination, entityName = 'itens' } 
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
-    min-height: 50px;
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border-primary);
+    min-height: 60px;
   }
 
   .pagination-btn {
-    background: #183054;
-    color: white !important;
+    background: var(--gradient-primary);
+    color: white;
     text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
     font-size: 14px;
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: all var(--transition-fast);
     cursor: pointer;
     border: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    box-shadow: var(--shadow-sm);
   }
 
   .pagination-btn:hover {
-    background: #1f3d66;
-    transform: translateY(-1px);
-    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    color: white;
     text-decoration: none;
   }
 
@@ -134,7 +187,38 @@ const { columns, data, renderActions = true, pagination, entityName = 'itens' } 
   }
 
   .pagination-info {
-    color: #666;
+    color: var(--text-muted);
     font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-muted);
+  }
+
+  .empty-state svg {
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+  }
+
+  /* Loading state */
+  .loading-skeleton {
+    background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 </style>

@@ -31,12 +31,13 @@ const { id } = Astro.props;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
     z-index: 3000;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-normal);
   }
 
   .alert-overlay.show {
@@ -49,25 +50,27 @@ const { id } = Astro.props;
   }
 
   .alert-content {
-    background: white;
-    border-radius: 8px;
+    background: var(--bg-modal);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
     max-width: 600px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(20px);
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-xl);
   }
 
   .alert-overlay.show .alert-content {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 
   .alert-overlay.closing .alert-content {
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(20px);
     opacity: 0;
   }
 
@@ -75,88 +78,106 @@ const { id } = Astro.props;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 24px 0 24px;
-    border-bottom: 1px solid #e9ecef;
-    margin-bottom: 20px;
+    padding: var(--space-xl) var(--space-xl) 0 var(--space-xl);
+    border-bottom: 1px solid var(--border-primary);
+    margin-bottom: var(--space-lg);
   }
 
   .alert-header h3 {
     margin: 0;
-    color: #333;
-    font-family: 'Arimo', sans-serif;
+    color: var(--text-primary);
+    font-family: inherit;
     font-size: 20px;
+    font-weight: 600;
   }
 
   .alert-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #666;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-size: 20px;
+    color: var(--text-muted);
     cursor: pointer;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
   }
 
   .alert-close:hover {
-    color: #333;
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
   }
 
   .alert-body {
-    padding: 0 24px 20px 24px;
+    padding: 0 var(--space-xl) var(--space-lg) var(--space-xl);
     text-align: center;
   }
 
   .alert-content {
-    padding: 20px;
+    padding: var(--space-lg);
   }
 
   :global(.error-title) {
     font-size: 24px;
-    color: #666;
-    font-family: 'Arimo', sans-serif;
+    color: var(--error);
+    font-family: inherit;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-sm);
   }
 
   :global(.error-message) {
     font-size: 14px;
-    color: #333;
-    font-family: 'Arimo', sans-serif;
+    color: var(--text-secondary);
+    font-family: inherit;
+    line-height: 1.5;
   }
 
   :global(.success-title) {
     font-size: 24px;
-    color: #28a745;
-    font-family: 'Arimo', sans-serif;
+    color: var(--success);
+    font-family: inherit;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-sm);
   }
 
   :global(.success-message) {
     font-size: 14px;
-    color: #333;
-    font-family: 'Arimo', sans-serif;
+    color: var(--text-secondary);
+    font-family: inherit;
+    line-height: 1.5;
   }
 
   .alert-actions {
-    padding: 0 24px 24px 24px;
+    padding: 0 var(--space-xl) var(--space-xl) var(--space-xl);
     text-align: center;
   }
 
   .btn-alert-ok {
-    background: #28a745;
+    background: var(--success);
     color: white;
     border: none;
-    border-radius: 6px;
-    padding: 10px 24px;
-    font-family: 'Arimo', sans-serif;
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-xl);
+    font-family: inherit;
     font-size: 14px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
   }
 
   .btn-alert-ok:hover {
-    background: #218838;
+    background: #16a34a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  }
+
+  .btn-alert-ok:active {
+    transform: translateY(0);
   }
 </style>
 

@@ -25,16 +25,48 @@ const { label, name, required = false, options, value = "" } = Astro.props;
 <style>
   select {
     width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-family: 'Arimo', sans-serif;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 14px;
     box-sizing: border-box;
-    background: white;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+  }
+
+  select::placeholder {
+    color: var(--text-placeholder);
   }
 
   select:focus {
     outline: none;
-    border-color: #183054;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+    background: var(--bg-elevated);
+  }
+
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    border-color: var(--border-primary) !important;
+    background-color: var(--bg-input) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  select:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-elevated) inset !important;
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 3px var(--accent-bg) !important;
+  }
+
+  select option {
+    background: var(--bg-modal);
+    color: var(--text-primary);
+    padding: var(--space-sm);
   }
 </style>
