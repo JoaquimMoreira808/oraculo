@@ -127,7 +127,7 @@ const fieldLabels = {
     flex-direction: column;
     animation: slideIn 0.4s ease-out;
     margin-top: 60px;
-    font-family: inherit;
+    font-family: 'Inter', sans-serif;
     backdrop-filter: blur(10px);
   }
 
@@ -156,32 +156,31 @@ const fieldLabels = {
     color: var(--text-primary);
     font-size: 20px;
     font-weight: 600;
-    font-family: inherit;
+    font-family: 'Inter', sans-serif;
   }
 
   .close-btn {
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
     font-size: 20px;
     cursor: pointer;
-    color: #ffffff;
-    padding: 8px;
+    color: var(--text-muted);
+    padding: var(--space-sm);
     width: 36px;
     height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    transition: background-color 0.2s, transform 0.1s;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
     font-weight: 300;
   }
 
   .close-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-  }
-
-  .close-btn:active {
-    transform: scale(0.95);
+    background: var(--error-bg);
+    border-color: var(--error);
+    color: var(--error);
+    transform: scale(1.05);
   }
 
   .results-container {
@@ -229,11 +228,33 @@ const fieldLabels = {
   }
 
   .empresa-result {
-    margin: 0;
-    padding: 20px;
-    border-bottom: 3px solid rgba(230, 228, 215, 0.3);
-    background: white;
+    padding: var(--space-xl);
+    border-bottom: 1px solid var(--border-primary);
+    background: var(--bg-card);
+    transition: all var(--transition-fast);
     position: relative;
+    overflow: hidden;
+  }
+
+  .empresa-result::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background var(--transition-fast);
+  }
+
+  .empresa-result:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .empresa-result:hover::before {
+    background: var(--accent-primary);
   }
 
   .empresa-result:last-child {
@@ -241,44 +262,53 @@ const fieldLabels = {
   }
 
   .record-name {
-    margin: 0;
-    color: #333333;
+    margin: 0 0 var(--space-xs) 0;
+    color: var(--text-primary);
     font-size: 18px;
     font-weight: 600;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
+    transition: color var(--transition-fast);
   }
 
   .record-type {
-    color: #666666;
+    color: var(--text-muted);
     font-size: 14px;
     font-weight: 500;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-primary);
   }
 
   .results-count {
-    padding: 12px 20px;
-    background: #183054;
-    color: #ffffff;
+    padding: var(--space-md) var(--space-xl);
+    background: var(--bg-elevated);
+    color: var(--text-muted);
     font-size: 13px;
     font-weight: 500;
-    border-bottom: 3px solid rgba(230, 228, 215, 0.3);
-    font-family: 'Arimo', sans-serif;
+    border-top: 1px solid var(--border-primary);
+    text-align: center;
+    font-family: 'Inter', sans-serif;
   }
 
   @media (max-width: 768px) {
     .search-results-overlay {
-      padding: 10px;
+      padding: var(--space-md);
     }
 
     .search-results {
       width: 100%;
       max-height: 90vh;
-      margin-top: 20px;
-      border-radius: 6px;
+      margin-top: var(--space-lg);
+      border-radius: var(--radius-lg);
     }
 
     .search-header {
-      padding: 20px;
+      padding: var(--space-lg);
     }
 
     .search-header h3 {
@@ -286,7 +316,7 @@ const fieldLabels = {
     }
 
     .empresa-result {
-      padding: 20px;
+      padding: var(--space-lg);
     }
   }
 </style>
