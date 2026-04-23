@@ -1,4 +1,4 @@
-# Invent - Sistema de Inventário
+# Omni-Data - Sistema de Inventário
 
 Sistema híbrido com Astro (frontend) + Express (API) em container único.
 

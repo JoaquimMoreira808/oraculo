@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: invent-app
+    container_name: omni-data-app
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -15,7 +15,7 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: invent-db
+    container_name: omni-data-db
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=rootpass

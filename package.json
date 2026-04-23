@@ -1,7 +1,7 @@
 {
-  "name": "invent",
+  "name": "omni-data",
   "version": "1.0.0",
-  "description": "Sistema de Inventário - Astro + Express",
+  "description": "Omni-Data - Sistema de Inventário - Astro + Express",
   "type": "commonjs",
   "engines": {
     "node": ">=18.0.0",

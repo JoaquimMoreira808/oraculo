@@ -8,7 +8,7 @@ import Layout from '../layouts/Layout.astro';
 	<main class="search-container">
 		<div class="search-wrapper">
 			<div class="hero-section">
-				<h1 class="search-title">Invent</h1>
+				<h1 class="search-title">Omni-Data</h1>
 				<p class="search-subtitle">Sistema inteligente de inventário e gestão</p>
 			</div>
 			
@@ -22,59 +22,22 @@ import Layout from '../layouts/Layout.astro';
 					<input 
 						id="search-input"
 						type="text" 
-						placeholder="Pesquisar empresas, máquinas, pessoas..." 
+						placeholder="Pesquisar no Omni-Data..." 
 						class="search-input"
 						autocomplete="off"
 					/>
 					<div class="search-actions">
-						<div class="search-filter" id="search-filter">
-							<span id="filter-text">Todas</span>
-							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M7 10l5 5 5-5z" fill="currentColor"/>
-							</svg>
-						</div>
+						<select id="search-filter" class="search-filter">
+							<option value="all">Todas</option>
+							<option value="dedicado">Dedicado</option>
+							<option value="cloud">Cloud</option>
+						</select>
 						<button class="clear-search" id="clear-search" title="Limpar busca">
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 							</svg>
 						</button>
 					</div>
-				</div>
-				
-				<div id="filter-dropdown" class="filter-dropdown hidden">
-					<div class="filter-section">
-						<div class="filter-label">Filtrar por categoria</div>
-						<div class="filter-option active" data-type="all">
-							<div class="filter-icon">🔍</div>
-							<span>Todas as categorias</span>
-						</div>
-						<div class="filter-option" data-type="empresa">
-							<div class="filter-icon">🏢</div>
-							<span>Empresas</span>
-						</div>
-						<div class="filter-option" data-type="pessoa">
-							<div class="filter-icon">👤</div>
-							<span>Pessoas</span>
-						</div>
-						<div class="filter-option" data-type="maquina">
-							<div class="filter-icon">⚙️</div>
-							<span>Máquinas</span>
-						</div>
-						<div class="filter-option" data-type="chatbot">
-							<div class="filter-icon">🤖</div>
-							<span>Chatbots</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="search-suggestions" id="search-suggestions">
-				<div class="suggestion-label">Sugestões populares:</div>
-				<div class="suggestion-tags">
-					<button class="suggestion-tag" data-query="empresa ativa">Empresas ativas</button>
-					<button class="suggestion-tag" data-query="máquina produção">Máquinas de produção</button>
-					<button class="suggestion-tag" data-query="chatbot whatsapp">Chatbots WhatsApp</button>
-					<button class="suggestion-tag" data-query="pessoa técnico">Técnicos</button>
 				</div>
 			</div>
 			
@@ -89,6 +52,15 @@ import Layout from '../layouts/Layout.astro';
 		</div>
 		
 		<div id="related-cards" class="related-cards hidden"></div>
+		
+		<!-- Modal de Registros Relacionados -->
+		<div id="relatedModal" class="modal">
+			<div class="modal-content">
+				<button class="modal-close" data-close-related>&times;</button>
+				<h2 id="relatedModalTitle">Registros Relacionados</h2>
+				<div id="relatedModalContent" class="related-modal-content"></div>
+			</div>
+		</div>
 	</main>
 </Layout>
 
@@ -201,9 +173,6 @@ import Layout from '../layouts/Layout.astro';
 	}
 
 	.search-filter {
-		display: flex;
-		align-items: center;
-		gap: var(--space-xs);
 		padding: var(--space-sm) var(--space-md);
 		background: var(--bg-elevated);
 		border: 1px solid var(--border-primary);
@@ -213,14 +182,15 @@ import Layout from '../layouts/Layout.astro';
 		font-weight: 500;
 		cursor: pointer;
 		transition: all var(--transition-fast);
-		user-select: none;
+		font-family: inherit;
+		outline: none;
+		appearance: auto;
 	}
 
 	.search-filter:hover {
 		background: var(--bg-hover);
 		border-color: var(--silver-muted);
 		color: var(--silver-light);
-		transform: translateY(-1px);
 	}
 
 	.clear-search {
@@ -254,139 +224,162 @@ import Layout from '../layouts/Layout.astro';
 	}
 
 
-
-	.filter-dropdown {
-		position: absolute;
-		right: 0;
-		top: calc(100% + 12px);
-		background: var(--bg-modal);
-		border: 1px solid var(--border-primary);
-		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow-xl);
-		z-index: 1000;
-		min-width: 220px;
-		overflow: hidden;
-		opacity: 0;
-		visibility: hidden;
-		transform: translateY(-8px) scale(0.95);
-		transition: all var(--transition-fast);
-		backdrop-filter: blur(10px);
-	}
-
-	.filter-dropdown:not(.hidden) {
-		opacity: 1;
-		visibility: visible;
-		transform: translateY(0) scale(1);
-	}
-
-	.filter-dropdown::before {
-		content: '';
-		position: absolute;
-		top: -6px;
-		right: 20px;
-		width: 12px;
-		height: 12px;
-		background: var(--bg-modal);
-		border: 1px solid var(--border-primary);
-		border-bottom: none;
-		border-right: none;
-		transform: rotate(45deg);
-	}
-
-	.filter-section {
-		padding: var(--space-sm) 0;
-	}
-
-	.filter-label {
-		padding: var(--space-sm) var(--space-md);
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		border-bottom: 1px solid var(--border-primary);
-		margin-bottom: var(--space-xs);
-	}
-
-	.filter-option {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		cursor: pointer;
-		font-size: 14px;
-		font-weight: 500;
-		transition: all var(--transition-fast);
-		color: var(--text-secondary);
-		position: relative;
-	}
-
-	.filter-option:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-	}
-
-	.filter-option.active {
-		background: var(--accent-bg);
-		color: var(--accent-primary);
-		border-left: 3px solid var(--accent-primary);
-	}
-
-	.filter-option.active::after {
-		content: '✓';
-		position: absolute;
-		right: var(--space-md);
-		color: var(--accent-primary);
-		font-weight: 600;
-	}
-
-	.filter-icon {
-		font-size: 16px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 20px;
-	}
-
-	.search-suggestions {
+	/* Modal de Registros Relacionados */
+	.modal {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
 		width: 100%;
-		text-align: center;
-		animation: fadeIn 1.4s ease-out 0.6s both;
-	}
-
-	.suggestion-label {
-		font-size: 14px;
-		color: var(--text-muted);
-		margin-bottom: var(--space-md);
-		font-weight: 500;
-	}
-
-	.suggestion-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-sm);
+		height: 100%;
+		background: rgba(0, 0, 0, 0.8);
+		backdrop-filter: blur(8px);
+		z-index: 3000;
+		align-items: center;
 		justify-content: center;
+		opacity: 0;
+		transition: opacity var(--transition-normal);
 	}
 
-	.suggestion-tag {
-		padding: var(--space-sm) var(--space-md);
-		background: var(--bg-elevated);
+	.modal.show {
+		display: flex;
+		opacity: 1;
+	}
+
+	.modal.closing {
+		opacity: 0;
+	}
+
+	.modal-content {
+		background: var(--bg-modal);
 		border: 1px solid var(--border-primary);
 		border-radius: var(--radius-xl);
-		color: var(--text-secondary);
-		font-size: 13px;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all var(--transition-fast);
-		user-select: none;
+		padding: var(--space-2xl);
+		max-width: 700px;
+		width: 90%;
+		position: relative;
+		max-height: 85vh;
+		overflow-y: auto;
+		transform: scale(0.95) translateY(20px);
+		opacity: 0;
+		transition: all var(--transition-normal);
+		box-shadow: var(--shadow-xl);
 	}
 
-	.suggestion-tag:hover {
+	.modal.show .modal-content {
+		transform: scale(1) translateY(0);
+		opacity: 1;
+	}
+
+	.modal.closing .modal-content {
+		transform: scale(0.95) translateY(20px);
+		opacity: 0;
+	}
+
+	.modal-close {
+		position: absolute;
+		top: var(--space-lg);
+		right: var(--space-lg);
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-md);
+		font-size: 20px;
+		color: var(--text-muted);
+		cursor: pointer;
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all var(--transition-fast);
+	}
+
+	.modal-close:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+		border-color: var(--border-hover);
+	}
+
+	#relatedModalTitle {
+		margin: 0 0 var(--space-xl) 0;
+		color: var(--text-primary);
+		font-family: 'Inter', sans-serif;
+		font-size: 24px;
+		font-weight: 600;
+	}
+
+	.related-modal-content {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-lg);
+	}
+
+	:global(.modal-related-card) {
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-lg);
+		padding: var(--space-lg);
+		transition: all var(--transition-fast);
+	}
+
+	:global(.modal-related-card:hover) {
+		background: var(--bg-hover);
+		border-color: var(--border-hover);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	:global(.modal-related-card h4) {
+		margin: 0 0 var(--space-md) 0;
+		color: var(--text-primary);
+		font-size: 18px;
+		font-weight: 600;
+		font-family: 'Inter', sans-serif;
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
+	:global(.modal-related-card h4::before) {
+		content: '🔗';
+		font-size: 16px;
+		opacity: 0.7;
+	}
+
+	:global(.modal-related-item) {
+		padding: var(--space-md);
+		background: var(--bg-card);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-md);
+		margin-bottom: var(--space-sm);
+		transition: all var(--transition-fast);
+	}
+
+	:global(.modal-related-item:hover) {
 		background: var(--bg-hover);
 		border-color: var(--accent-primary);
+		transform: translateX(4px);
+	}
+
+	:global(.modal-related-item:last-child) {
+		margin-bottom: 0;
+	}
+
+	:global(.modal-related-name) {
+		color: var(--text-primary);
+		font-size: 15px;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
+	}
+
+	:global(.modal-related-link) {
+		text-decoration: none;
+		display: block;
+		transition: all var(--transition-fast);
+	}
+
+	:global(.modal-related-link:hover .modal-related-name) {
 		color: var(--accent-primary);
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-md);
 	}
 
 	.loading {
@@ -417,58 +410,6 @@ import Layout from '../layouts/Layout.astro';
 
 	.hidden {
 		display: none !important;
-	}
-
-	.related-cards {
-		position: absolute;
-		left: calc(50% + 420px);
-		top: 120px;
-		width: 320px;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-md);
-		max-height: 80vh;
-		overflow-y: auto;
-		animation: slideIn 0.4s ease-out;
-	}
-
-	/* Aplicar scrollbar personalizada para cards relacionados */
-	.related-cards::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.related-cards::-webkit-scrollbar-track {
-		background: var(--bg-elevated);
-		border-radius: 3px;
-		margin: 2px;
-	}
-
-	.related-cards::-webkit-scrollbar-thumb {
-		background: var(--border-primary);
-		border-radius: 3px;
-		transition: all var(--transition-fast);
-	}
-
-	.related-cards::-webkit-scrollbar-thumb:hover {
-		background: var(--accent-primary);
-		box-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
-	}
-
-	@media (max-width: 1200px) {
-		.related-cards {
-			position: static;
-			left: auto;
-			top: auto;
-			width: 100%;
-			max-width: 700px;
-			max-height: 50vh;
-			margin: 16px auto 0;
-		}
-		
-		.search-container {
-			flex-direction: column;
-			align-items: center;
-		}
 	}
 
 	.search-results-card {
@@ -727,93 +668,7 @@ import Layout from '../layouts/Layout.astro';
 		transform: translateX(2px);
 	}
 
-	:global(.related-card) {
-		background: var(--bg-card);
-		border: 1px solid var(--border-primary);
-		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow-lg);
-		padding: var(--space-lg);
-		font-family: 'Inter', sans-serif;
-		backdrop-filter: blur(10px);
-		transition: all var(--transition-fast);
-	}
-
-	:global(.related-card:hover) {
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-xl);
-		border-color: var(--border-hover);
-	}
-
-	:global(.related-card h4) {
-		margin: 0 0 var(--space-md) 0;
-		color: var(--text-primary);
-		font-size: 16px;
-		font-weight: 600;
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-	}
-
-	:global(.related-card h4::before) {
-		content: '🔗';
-		font-size: 14px;
-		opacity: 0.7;
-	}
-
-	:global(.related-item) {
-		padding: var(--space-sm) var(--space-md);
-		background: var(--bg-elevated);
-		border: 1px solid var(--border-primary);
-		border-radius: var(--radius-md);
-		margin-bottom: var(--space-sm);
-		transition: all var(--transition-fast);
-	}
-
-	:global(.related-item:hover) {
-		background: var(--bg-hover);
-		border-color: var(--accent-primary);
-		transform: translateX(4px);
-	}
-
-	:global(.related-item:last-child) {
-		margin-bottom: 0;
-	}
-
-	:global(.related-name) {
-		color: var(--text-primary);
-		font-size: 14px;
-		font-weight: 500;
-		font-family: 'Inter', sans-serif;
-	}
-
-	:global(.related-link) {
-		text-decoration: none;
-		display: block;
-		transition: all var(--transition-fast);
-	}
-
-	:global(.related-link:hover .related-name) {
-		color: var(--accent-primary);
-	}
-
 	/* Responsividade */
-	@media (max-width: 1200px) {
-		.related-cards {
-			position: static;
-			left: auto;
-			top: auto;
-			width: 100%;
-			max-width: 700px;
-			max-height: 50vh;
-			margin: var(--space-lg) auto 0;
-		}
-		
-		.search-container {
-			flex-direction: column;
-			align-items: center;
-		}
-	}
-
 	@media (max-width: 768px) {
 		.search-container {
 			padding: var(--space-lg) var(--space-md);
@@ -835,20 +690,6 @@ import Layout from '../layouts/Layout.astro';
 		.search-actions {
 			gap: var(--space-xs);
 		}
-		
-		.suggestion-tags {
-			justify-content: flex-start;
-		}
-		
-		.suggestion-tag {
-			font-size: 12px;
-			padding: var(--space-xs) var(--space-sm);
-		}
-		
-		.filter-dropdown {
-			min-width: 200px;
-			right: -20px;
-		}
 	}
 </style>
 
@@ -860,11 +701,11 @@ import Layout from '../layouts/Layout.astro';
 	const resultsCard = document.getElementById('search-results-card');
 	const resultsContent = document.getElementById('results-content');
 	const relatedCards = document.getElementById('related-cards');
+	const relatedModal = document.getElementById('relatedModal');
+	const relatedModalContent = document.getElementById('relatedModalContent');
+	const relatedModalTitle = document.getElementById('relatedModalTitle');
 	const searchFilter = document.getElementById('search-filter');
-	const filterDropdown = document.getElementById('filter-dropdown');
-	const filterText = document.getElementById('filter-text');
 	const clearSearch = document.getElementById('clear-search');
-	const suggestionTags = document.querySelectorAll('.suggestion-tag');
 
 	let searchTimeout;
 	let currentResults = [];
@@ -881,7 +722,12 @@ import Layout from '../layouts/Layout.astro';
 		rede: 'Rede',
 		linha: 'Linha',
 		senha: 'Senha',
-		tronco: 'Tronco'
+		tronco: 'Tronco',
+		// Cloud types
+		revenda_cloud: 'Revenda Cloud',
+		perfil_cloud: 'Perfil Cloud',
+		contato_cloud: 'Contato Cloud',
+		organizacao_cloud: 'Organização Cloud'
 	};
 
 	const fieldLabels = {
@@ -912,7 +758,12 @@ import Layout from '../layouts/Layout.astro';
 			equipamento: `/equipamentos?view=${id}`,
 			contato: `/pessoas?view=${id}`,
 			chatbot: `/chatbots?view=${id}`,
-			linha: `/linhas?view=${id}`
+			linha: `/linhas?view=${id}`,
+			// Cloud routes
+			revenda_cloud: `/revenda-cloud?view=${id}`,
+			perfil_cloud: `/perfil-cloud?view=${id}`,
+			contato_cloud: `/contato-cloud?view=${id}`,
+			organizacao_cloud: `/organizacao-cloud?view=${id}`
 		};
 		return routes[type] || '#';
 	}
@@ -970,96 +821,109 @@ import Layout from '../layouts/Layout.astro';
 		resultsContent.innerHTML = '';
 		relatedCards.classList.add('hidden');
 		relatedCards.innerHTML = '';
+		closeRelatedModal();
+	}
+
+	function closeRelatedModal() {
+		if (relatedModal.classList.contains('show')) {
+			relatedModal.classList.add('closing');
+			setTimeout(() => {
+				relatedModal.classList.remove('show', 'closing');
+				relatedModal.style.display = 'none';
+				relatedModalContent.innerHTML = '';
+			}, 300);
+		}
 	}
 
 	async function expandRecord(type, id, index) {
 		try {
 			const relatedRecords = await fetchRelatedRecords(type, id);
-			showRelatedCards(relatedRecords, currentResults[index]);
+			showRelatedModal(relatedRecords, currentResults[index]);
 		} catch (error) {
 			console.error('Erro ao buscar relacionados:', error);
 		}
 	}
 
-	function showRelatedCards(records, originalRecord) {
+	function showRelatedModal(records, originalRecord) {
+		const displayName = originalRecord.type === 'chatbot' ? originalRecord.subtitle : originalRecord.title;
+		relatedModalTitle.textContent = `Relacionados - ${displayName}`;
+		
 		if (records.length === 0) {
-			relatedCards.innerHTML = '<div class="related-card"><h4>Nenhum registro relacionado encontrado</h4></div>';
-			relatedCards.classList.remove('hidden');
-			return;
-		}
-
-		const groupedRecords = records.reduce((acc, record) => {
-			if (!acc[record.type]) acc[record.type] = [];
-			acc[record.type].push(record);
-			return acc;
-		}, {});
-
-		let html = '';
-		Object.entries(groupedRecords).forEach(([type, items]) => {
-			html += `
-				<div class="related-card">
-					<h4>${tableLabels[type] || type} (${items.length})</h4>
-					${items.map(item => {
-						const detailUrl = getDetailUrl(item.type, item.id);
-						return `
-							<div class="related-item">
-								<a href="${detailUrl}" class="related-link">
-									<div class="related-name">${item.nome}</div>
-								</a>
-							</div>
-						`;
-					}).join('')}
+			relatedModalContent.innerHTML = `
+				<div style="text-align: center; padding: var(--space-2xl); color: var(--text-muted);">
+					<div style="font-size: 48px; margin-bottom: var(--space-md); opacity: 0.5;">🔍</div>
+					<p style="margin: 0; font-size: 16px; font-weight: 500;">Nada por aqui...</p>
+					<p style="margin: var(--space-xs) 0 0 0; font-size: 14px; opacity: 0.8;">Nenhum registro relacionado encontrado</p>
 				</div>
 			`;
-		});
+		} else {
+			const groupedRecords = records.reduce((acc, record) => {
+				if (!acc[record.type]) acc[record.type] = [];
+				acc[record.type].push(record);
+				return acc;
+			}, {});
 
-		relatedCards.innerHTML = html;
-		relatedCards.classList.remove('hidden');
+			let html = '';
+			Object.entries(groupedRecords).forEach(([type, items]) => {
+				html += `
+					<div class="modal-related-card">
+						<h4>${tableLabels[type] || type} (${items.length})</h4>
+						${items.map(item => {
+							const detailUrl = getDetailUrl(item.type, item.id);
+							return `
+								<div class="modal-related-item">
+									<a href="${detailUrl}" class="modal-related-link">
+										<div class="modal-related-name">${item.nome}</div>
+									</a>
+								</div>
+							`;
+						}).join('')}
+					</div>
+				`;
+			});
+			relatedModalContent.innerHTML = html;
+		}
+		
+		relatedModal.style.display = 'flex';
+		relatedModal.offsetHeight;
+		relatedModal.classList.add('show');
 	}
 
 	// Tornar função global para uso no onclick
 	window.expandRecord = expandRecord;
 
-	// Event listeners para o dropdown de filtro
-	searchFilter?.addEventListener('click', (e) => {
-		e.stopPropagation();
-		filterDropdown?.classList.toggle('hidden');
+	// Filtro de categoria
+	searchFilter?.addEventListener('change', () => {
+		currentFilter = searchFilter.value;
+		if (searchInput.value.trim()) performSearch(searchInput.value.trim());
 	});
 
-	// Fechar dropdown ao clicar fora
-	document.addEventListener('click', () => {
-		filterDropdown?.classList.add('hidden');
+	// Event listeners para o modal de relacionados
+	document.addEventListener('click', (e) => {
+		if (e.target.matches('[data-close-related]')) {
+			closeRelatedModal();
+		}
 	});
 
-	// Prevenir fechamento ao clicar dentro do dropdown
-	filterDropdown?.addEventListener('click', (e) => {
-		e.stopPropagation();
+	// Fechar modal ao clicar fora
+	relatedModal?.addEventListener('click', (e) => {
+		if (e.target === relatedModal) {
+			closeRelatedModal();
+		}
 	});
 
-	// Seleção de filtro
-	document.querySelectorAll('.filter-option').forEach(option => {
-		option.addEventListener('click', (e) => {
-			e.stopPropagation();
-			
-			// Remover classe active de todas as opções
-			document.querySelectorAll('.filter-option').forEach(opt => opt.classList.remove('active'));
-			
-			// Adicionar classe active na opção selecionada
-			e.currentTarget.classList.add('active');
-			
-			const selectedType = e.currentTarget.dataset.type;
-			const selectedText = e.currentTarget.querySelector('span').textContent;
-			
-			currentFilter = selectedType;
-			filterText.textContent = selectedText;
-			filterDropdown?.classList.add('hidden');
-			
-			// Se há uma busca ativa, refaz a busca com o novo filtro
-			if (searchInput.value.trim()) {
-				performSearch(searchInput.value.trim());
+	// Fechar modal com ESC
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			if (relatedModal.classList.contains('show')) {
+				closeRelatedModal();
+			} else {
+				closeResults();
 			}
-		});
+		}
 	});
+
+
 
 	// Botão de limpar busca
 	clearSearch?.addEventListener('click', () => {
@@ -1067,16 +931,6 @@ import Layout from '../layouts/Layout.astro';
 		closeResults();
 		clearSearch.classList.remove('visible');
 		searchInput.focus();
-	});
-
-	// Sugestões de busca
-	suggestionTags.forEach(tag => {
-		tag.addEventListener('click', () => {
-			const query = tag.dataset.query;
-			searchInput.value = query;
-			performSearch(query);
-			clearSearch.classList.add('visible');
-		});
 	});
 
 
@@ -1135,7 +989,11 @@ import Layout from '../layouts/Layout.astro';
 
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape') {
-			closeResults();
+			if (relatedModal.classList.contains('show')) {
+				closeRelatedModal();
+			} else {
+				closeResults();
+			}
 		}
 	});
 
