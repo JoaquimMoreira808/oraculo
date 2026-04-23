@@ -523,6 +523,8 @@ const { data: chatbots, pagination } = chatbotsResult;
     let currentChatbotId = null;
     let editingNumeroId = null;
 
+    refreshTable();
+
     // Verificar se deve abrir modal de detalhes automaticamente
     const urlParams = new URLSearchParams(window.location.search);
     const viewId = urlParams.get('view');
@@ -532,8 +534,9 @@ const { data: chatbots, pagination } = chatbotsResult;
 
     async function refreshTable() {
       try {
-        const response = await fetch('http://localhost:3000/api/chatbots');
-        const chatbots = await response.json();
+        const response = await fetch('/api/chatbots', { credentials: 'include' });
+        const result = await response.json();
+        const chatbots = Array.isArray(result) ? result : (result.data || []);
         const tbody = document.querySelector('tbody');
         tbody.innerHTML = chatbots.map(chatbot => `
           <tr>
@@ -622,7 +625,7 @@ const { data: chatbots, pagination } = chatbotsResult;
     async function showDetails(id) {
       try {
         currentChatbotId = id;
-        const response = await fetch(`http://localhost:3000/api/chatbots/${id}`);
+        const response = await fetch(`/api/chatbots/${id}`, { credentials: 'include' });
         const chatbot = await response.json();
         document.getElementById('modalTitle').textContent = `Detalhes - ${chatbot.login}`;
         
@@ -656,7 +659,7 @@ const { data: chatbots, pagination } = chatbotsResult;
 
     async function editChatbot(id) {
       try {
-        const response = await fetch(`http://localhost:3000/api/chatbots/${id}`);
+        const response = await fetch(`/api/chatbots/${id}`, { credentials: 'include' });
         const chatbot = await response.json();
         isEditing = true;
         editingId = id;
@@ -689,7 +692,7 @@ const { data: chatbots, pagination } = chatbotsResult;
 
     async function confirmDelete() {
       try {
-        const response = await fetch(`http://localhost:3000/api/chatbots/${deleteId}`, { method: 'DELETE' });
+        const response = await fetch(`/api/chatbots/${deleteId}`, { method: 'DELETE', credentials: 'include' });
         if (response.ok) {
           confirmModal.classList.add('closing');
           setTimeout(async () => {
@@ -753,9 +756,10 @@ const { data: chatbots, pagination } = chatbotsResult;
       });
       
       try {
-        const url = isEditing ? `http://localhost:3000/api/chatbots/${editingId}` : 'http://localhost:3000/api/chatbots';
+        const url = isEditing ? `/api/chatbots/${editingId}` : '/api/chatbots';
         const method = isEditing ? 'PUT' : 'POST';
         const response = await fetch(url, {
+          credentials: 'include',
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -775,7 +779,7 @@ const { data: chatbots, pagination } = chatbotsResult;
 
     async function loadNumeros(chatbotId) {
       try {
-        const response = await fetch(`http://localhost:3000/api/numerobots?chatbot_id=${chatbotId}`);
+        const response = await fetch(`/api/numerobots?chatbot_id=${chatbotId}`, { credentials: 'include' });
         const numeros = await response.json();
         const container = document.getElementById('numerosList');
         container.innerHTML = numeros.map(numero => `
@@ -805,7 +809,7 @@ const { data: chatbots, pagination } = chatbotsResult;
 
     window.editNumero = async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/numerobots/${id}`);
+        const response = await fetch(`/api/numerobots/${id}`, { credentials: 'include' });
         const numero = await response.json();
         editingNumeroId = id;
         document.getElementById('numeroModal').querySelector('.modal-title').textContent = 'Editar Número';
@@ -821,7 +825,7 @@ const { data: chatbots, pagination } = chatbotsResult;
     window.deleteNumero = async (id) => {
       if (confirm('Tem certeza que deseja excluir este número?')) {
         try {
-          const response = await fetch(`http://localhost:3000/api/numerobots/${id}`, { method: 'DELETE' });
+          const response = await fetch(`/api/numerobots/${id}`, { method: 'DELETE', credentials: 'include' });
           if (response.ok) {
             await loadNumeros(currentChatbotId);
           } else {
@@ -849,11 +853,12 @@ const { data: chatbots, pagination } = chatbotsResult;
       
       try {
         const url = editingNumeroId 
-          ? `http://localhost:3000/api/numerobots/${editingNumeroId}`
-          : 'http://localhost:3000/api/numerobots';
+          ? `/api/numerobots/${editingNumeroId}`
+          : '/api/numerobots';
         const method = editingNumeroId ? 'PUT' : 'POST';
         
         const response = await fetch(url, {
+          credentials: 'include',
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
