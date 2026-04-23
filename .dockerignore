@@ -1,6 +1,12 @@
 node_modules
 .git
 .env
+.env.local
+dist
+.astro
 docs
 scripts
 *.log
+ngrok.log
+uploads/*
+!uploads/.gitkeep

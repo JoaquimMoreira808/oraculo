@@ -59,8 +59,7 @@ const isHomePage = pathname === '/';
     </button>
     
     <div class="dropdown" id="dropdown">
-      <a href="#" class="dropdown-item">Mais informações</a>
-      <a href="#" class="dropdown-item">Sair</a>
+      <button id="logout-btn" class="dropdown-item logout-item">Sair</button>
     </div>
   </div>
 </div>
@@ -330,6 +329,30 @@ const isHomePage = pathname === '/';
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   }
 
+  .dropdown-user-info {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-primary);
+    font-size: 13px;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .logout-item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--error);
+    font-family: inherit;
+  }
+
+  .logout-item:hover {
+    background: var(--error-bg);
+    color: var(--error);
+    padding-left: calc(var(--space-md) + 4px);
+  }
+
   /* Responsive design */
   @media (max-width: 768px) {
     .topbar {
@@ -361,6 +384,27 @@ const isHomePage = pathname === '/';
     const registrosDropdown = document.getElementById('registrosDropdown');
     const cloudBtn = document.getElementById('cloudBtn');
     const cloudDropdown = document.getElementById('cloudDropdown');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('dropdown-user-info');
+
+    // Verificar autenticação e carregar dados do usuário
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(r => {
+        if (!r.ok) { window.location.replace('/login'); return null; }
+        return r.json();
+      })
+      .then(data => {
+        if (data && userInfo) {
+          userInfo.textContent = data.nome || data.email;
+        }
+      })
+      .catch(() => window.location.replace('/login'));
+
+    // Logout
+    logoutBtn?.addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      window.location.replace('/login');
+    });
 
     // Dropdown de usuário
     userButton?.addEventListener('click', (e) => {

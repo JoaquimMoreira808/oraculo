@@ -1,5 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const requireAuth = require('../../backend/middleware/auth');
+const authRoutes = require('../../backend/routes/auth');
+
+// Auth (pública)
+router.use('/auth', authRoutes);
+
+// Protege todas as rotas abaixo
+router.use(requireAuth);
 
 // Import all route modules
 const empresasRoutes = require('../../backend/routes/empresas');

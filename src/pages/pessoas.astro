@@ -287,6 +287,8 @@ const { data: contatos, pagination } = contatosResult;
     let editingId = null;
     let deleteId = null;
 
+    refreshTable();
+
     // Verificar se deve abrir modal de detalhes automaticamente
     const urlParams = new URLSearchParams(window.location.search);
     const viewId = urlParams.get('view');
@@ -296,8 +298,9 @@ const { data: contatos, pagination } = contatosResult;
 
     async function refreshTable() {
       try {
-        const response = await fetch('http://localhost:3000/api/contatos');
-        const contatos = await response.json();
+        const response = await fetch('/api/contatos', { credentials: 'include' });
+        const result = await response.json();
+        const contatos = Array.isArray(result) ? result : (result.data || []);
         const tbody = document.querySelector('tbody');
         tbody.innerHTML = contatos.map(contato => `
           <tr>
@@ -374,7 +377,7 @@ const { data: contatos, pagination } = contatosResult;
 
     async function editContato(id) {
       try {
-        const response = await fetch(`http://localhost:3000/api/contatos/${id}`);
+        const response = await fetch(`/api/contatos/${id}`, { credentials: 'include' });
         const contato = await response.json();
         isEditing = true;
         editingId = id;
@@ -398,7 +401,7 @@ const { data: contatos, pagination } = contatosResult;
 
     async function confirmDelete() {
       try {
-        const response = await fetch(`http://localhost:3000/api/contatos/${deleteId}`, { method: 'DELETE' });
+        const response = await fetch(`/api/contatos/${deleteId}`, { method: 'DELETE', credentials: 'include' });
         if (response.ok) {
           confirmModal.classList.add('closing');
           setTimeout(async () => {
@@ -452,7 +455,7 @@ const { data: contatos, pagination } = contatosResult;
 
     async function showDetails(id) {
       try {
-        const response = await fetch(`http://localhost:3000/api/contatos/${id}`);
+        const response = await fetch(`/api/contatos/${id}`, { credentials: 'include' });
         const contato = await response.json();
         document.getElementById('modalTitle').textContent = `Detalhes - ${contato.nome}`;
         
@@ -477,9 +480,10 @@ const { data: contatos, pagination } = contatosResult;
       const data = Object.fromEntries(formData);
       
       try {
-        const url = isEditing ? `http://localhost:3000/api/contatos/${editingId}` : 'http://localhost:3000/api/contatos';
+        const url = isEditing ? `/api/contatos/${editingId}` : '/api/contatos';
         const method = isEditing ? 'PUT' : 'POST';
         const response = await fetch(url, {
+          credentials: 'include',
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)

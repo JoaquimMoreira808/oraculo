@@ -528,6 +528,8 @@ const { data: maquinas, pagination } = maquinasResult;
     let currentEntity = null;
     let editingEntityId = null;
 
+    refreshTable();
+
     // Verificar se deve abrir modal de detalhes automaticamente
     const urlParams = new URLSearchParams(window.location.search);
     const viewId = urlParams.get('view');
@@ -537,8 +539,9 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function refreshTable() {
       try {
-        const response = await fetch('http://localhost:3000/api/maquinas');
-        const maquinas = await response.json();
+        const response = await fetch('/api/maquinas', { credentials: 'include' });
+        const result = await response.json();
+        const maquinas = Array.isArray(result) ? result : (result.data || []);
         const tbody = document.querySelector('tbody');
         tbody.innerHTML = maquinas.map(maquina => `
           <tr>
@@ -636,7 +639,7 @@ const { data: maquinas, pagination } = maquinasResult;
     async function showDetails(id) {
       try {
         currentMaquinaId = id;
-        const response = await fetch(`http://localhost:3000/api/maquinas/${id}`);
+        const response = await fetch(`/api/maquinas/${id}`, { credentials: 'include' });
         const maquina = await response.json();
         document.getElementById('modalTitle').textContent = `Detalhes - ${maquina.nome}`;
         
@@ -681,7 +684,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function editMaquina(id) {
       try {
-        const response = await fetch(`http://localhost:3000/api/maquinas/${id}`);
+        const response = await fetch(`/api/maquinas/${id}`, { credentials: 'include' });
         const maquina = await response.json();
         isEditing = true;
         editingId = id;
@@ -705,7 +708,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function confirmDelete() {
       try {
-        const response = await fetch(`http://localhost:3000/api/maquinas/${deleteId}`, { method: 'DELETE' });
+        const response = await fetch(`/api/maquinas/${deleteId}`, { method: 'DELETE', credentials: 'include' });
         if (response.ok) {
           confirmModal.classList.add('closing');
           setTimeout(async () => {
@@ -762,9 +765,10 @@ const { data: maquinas, pagination } = maquinasResult;
       const formData = new FormData(form);
       const data = Object.fromEntries(formData);
       try {
-        const url = isEditing ? `http://localhost:3000/api/maquinas/${editingId}` : 'http://localhost:3000/api/maquinas';
+        const url = isEditing ? `/api/maquinas/${editingId}` : '/api/maquinas';
         const method = isEditing ? 'PUT' : 'POST';
         const response = await fetch(url, {
+          credentials: 'include',
           method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -785,7 +789,7 @@ const { data: maquinas, pagination } = maquinasResult;
     // Funções para carregar entidades
     async function loadEquipamentos(maquinaId) {
       try {
-        const response = await fetch(`http://localhost:3000/api/equipamentos?maquina_id=${maquinaId}`);
+        const response = await fetch(`/api/equipamentos?maquina_id=${maquinaId}`, { credentials: 'include' });
         const equipamentos = await response.json();
         const container = document.getElementById('equipamentosList');
         container.innerHTML = equipamentos.map(eq => `
@@ -816,7 +820,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function loadRede(maquinaId) {
       try {
-        const response = await fetch(`http://localhost:3000/api/rede?maquina_id=${maquinaId}`);
+        const response = await fetch(`/api/rede?maquina_id=${maquinaId}`, { credentials: 'include' });
         const redes = await response.json();
         const container = document.getElementById('redeList');
         container.innerHTML = redes.map(rede => `
@@ -846,7 +850,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function loadLinhas(maquinaId) {
       try {
-        const response = await fetch(`http://localhost:3000/api/linhas?maquina_id=${maquinaId}`);
+        const response = await fetch(`/api/linhas?maquina_id=${maquinaId}`, { credentials: 'include' });
         const linhas = await response.json();
         const container = document.getElementById('linhasList');
         container.innerHTML = linhas.map(linha => `
@@ -876,7 +880,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function loadSenhas(maquinaId) {
       try {
-        const response = await fetch(`http://localhost:3000/api/senhas?maquina_id=${maquinaId}`);
+        const response = await fetch(`/api/senhas?maquina_id=${maquinaId}`, { credentials: 'include' });
         const senhas = await response.json();
         const container = document.getElementById('senhasList');
         container.innerHTML = senhas.map(senha => `
@@ -906,7 +910,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     async function loadTroncos(maquinaId) {
       try {
-        const response = await fetch(`http://localhost:3000/api/troncos?maquina_id=${maquinaId}`);
+        const response = await fetch(`/api/troncos?maquina_id=${maquinaId}`, { credentials: 'include' });
         const troncos = await response.json();
         const container = document.getElementById('troncosList');
         container.innerHTML = troncos.map(tronco => `
@@ -937,7 +941,7 @@ const { data: maquinas, pagination } = maquinasResult;
     // Funções globais para edição
     window.editEquipamento = async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/equipamentos/${id}`);
+        const response = await fetch(`/api/equipamentos/${id}`, { credentials: 'include' });
         const eq = await response.json();
         currentEntity = 'equipamentos';
         editingEntityId = id;
@@ -955,7 +959,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     window.editRede = async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/rede/${id}`);
+        const response = await fetch(`/api/rede/${id}`, { credentials: 'include' });
         const rede = await response.json();
         currentEntity = 'rede';
         editingEntityId = id;
@@ -972,7 +976,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     window.editLinha = async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/linhas/${id}`);
+        const response = await fetch(`/api/linhas/${id}`, { credentials: 'include' });
         const linha = await response.json();
         currentEntity = 'linhas';
         editingEntityId = id;
@@ -990,7 +994,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     window.editSenha = async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/senhas/${id}`);
+        const response = await fetch(`/api/senhas/${id}`, { credentials: 'include' });
         const senha = await response.json();
         currentEntity = 'senhas';
         editingEntityId = id;
@@ -1007,7 +1011,7 @@ const { data: maquinas, pagination } = maquinasResult;
 
     window.editTronco = async (id) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/troncos/${id}`);
+        const response = await fetch(`/api/troncos/${id}`, { credentials: 'include' });
         const tronco = await response.json();
         currentEntity = 'troncos';
         editingEntityId = id;
@@ -1039,7 +1043,7 @@ const { data: maquinas, pagination } = maquinasResult;
           };
           
           const apiEntity = entityMap[entity];
-          const response = await fetch(`http://localhost:3000/api/${apiEntity}/${id}`, { method: 'DELETE' });
+          const response = await fetch(`/api/${apiEntity}/${id}`, { method: 'DELETE', credentials: 'include' });
           if (response.ok) {
             // Recarregar a lista correspondente
             switch(entity) {
@@ -1123,11 +1127,12 @@ const { data: maquinas, pagination } = maquinasResult;
           
           const entity = entityMap[formId];
           const url = editingEntityId 
-            ? `http://localhost:3000/api/${entity}/${editingEntityId}`
-            : `http://localhost:3000/api/${entity}`;
+            ? `/api/${entity}/${editingEntityId}`
+            : `/api/${entity}`;
           const method = editingEntityId ? 'PUT' : 'POST';
           
           const response = await fetch(url, {
+          credentials: 'include',
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)

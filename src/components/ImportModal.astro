@@ -436,8 +436,9 @@ const { id, title, templateUrl, importType } = Astro.props;
       const importType = importBtn.getAttribute('data-import-type');
       
       try {
-        const response = await fetch(`http://localhost:3000/api/import/${importType}`, {
+        const response = await fetch(`/api/import/${importType}`, {
           method: 'POST',
+          credentials: 'include',
           body: formData
         });
         

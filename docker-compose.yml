@@ -11,24 +11,28 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./uploads:/app/uploads
+      - uploads_data:/app/uploads
 
   db:
     image: mysql:8.0
     container_name: omni-data-db
     restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpass
-      - MYSQL_DATABASE=invent
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 10s
       retries: 10
 
 volumes:
   mysql_data:
+  uploads_data:

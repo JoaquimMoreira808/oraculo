@@ -1,7 +1,9 @@
 import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
 
 export default defineConfig({
-  output: 'static',
+  output: 'server',
+  adapter: node({ mode: 'middleware' }),
   build: {
     assets: 'assets'
   },
@@ -14,6 +16,12 @@ export default defineConfig({
       host: true,
       hmr: {
         clientPort: 4321
+      },
+      proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true
+        }
       }
     }
   }

@@ -19,10 +19,14 @@
     "db:seed": "node scripts/seed.cjs"
   },
   "dependencies": {
+    "@astrojs/node": "^9.5.5",
     "astro": "^5.16.15",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.16.2",
     "xlsx": "^0.18.5"
@@ -30,7 +34,12 @@
   "devDependencies": {
     "tsx": "^4.19.2"
   },
-  "keywords": ["inventory", "astro", "express", "mysql"],
+  "keywords": [
+    "inventory",
+    "astro",
+    "express",
+    "mysql"
+  ],
   "author": "",
   "license": "MIT"
 }
