@@ -6,7 +6,10 @@ import ViewButton from '../components/ViewButton.astro';
 import EditButton from '../components/EditButton.astro';
 import DeleteButton from '../components/DeleteButton.astro';
 import AddButton from '../components/AddButton.astro';
+import ImportButton from '../components/ImportButton.astro';
 import Modal from '../components/Modal.astro';
+import ImportModal from '../components/ImportModal.astro';
+import ImportAlert from '../components/ImportAlert.astro';
 import FormField from '../components/FormField.astro';
 import ConfirmModal from '../components/ConfirmModal.astro';
 import { fetchPaginatedData } from '../lib/api.js';
@@ -24,7 +27,10 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
   <main>
     <div class="header">
       <h1 class="page-title">Revendas Cloud</h1>
-      <AddButton text="Nova Revenda" id="addRevendaBtn" />
+      <div class="header-buttons">
+        <AddButton text="Nova Revenda" id="addRevendaBtn" />
+        <ImportButton text="Revendas" id="importRevendaBtn" />
+      </div>
     </div>
     
     <DataTable 
@@ -67,6 +73,10 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
     confirmText="Excluir"
   />
 
+  <ImportModal id="importModal" title="Importar Revendas" templateUrl="/templates/revenda_cloud_template.csv" importType="revenda-cloud" />
+
+  <ImportAlert id="importAlert" />
+
   <div id="detailsModal" class="modal">
     <div class="modal-content">
       <button class="modal-close" data-close-details>&times;</button>
@@ -102,6 +112,49 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
       </div>
     </div>
   </div>
+  <!-- Modal de detalhes para Perfil -->
+  <div id="perfilDetailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-perfil-details>&times;</button>
+      <h2 id="perfilModalTitle">Detalhes do Perfil</h2>
+      <div class="details-stack">
+        <div class="detail-item" id="perfilNomeText"></div>
+        <div class="detail-item" id="perfilRevendaText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalhes para Contato -->
+  <div id="contatoDetailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-contato-details>&times;</button>
+      <h2 id="contatoModalTitle">Detalhes do Contato</h2>
+      <div class="details-stack">
+        <div class="detail-item" id="contatoNomeText"></div>
+        <div class="detail-item" id="contatoEmailText"></div>
+        <div class="detail-item" id="contatoRevendaText"></div>
+        <div class="detail-item" id="contatoPerfilText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalhes para Organização -->
+  <div id="organizacaoDetailsModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" data-close-organizacao-details>&times;</button>
+      <h2 id="organizacaoModalTitle">Detalhes da Organização</h2>
+      <div class="details-stack">
+        <div class="detail-item" id="orgNomeFantasiaText"></div>
+        <div class="detail-item" id="orgRazaoSocialText"></div>
+        <div class="detail-item" id="orgCnpjText"></div>
+        <div class="detail-item" id="orgTelefoneText"></div>
+        <div class="detail-item" id="orgEmailText"></div>
+        <div class="detail-item" id="orgCepText"></div>
+        <div class="detail-item" id="orgCidadeText"></div>
+        <div class="detail-item" id="orgRevendaText"></div>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <style>
@@ -134,6 +187,11 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
     z-index: 1;
   }
 
+  .header-buttons {
+    display: flex;
+    align-items: center;
+  }
+
   .page-title {
     margin: 0;
     color: #333;
@@ -149,12 +207,13 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
     z-index: 2000;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-normal);
   }
 
   .modal.show {
@@ -167,100 +226,125 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
   }
 
   .modal-content {
-    background: white;
-    border-radius: 8px;
-    padding: 32px;
+    background: var(--bg-modal);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
     max-width: 600px;
     width: 90%;
     position: relative;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow-y: auto;
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(20px);
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-xl);
   }
 
   .modal.show .modal-content {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 
   .modal.closing .modal-content {
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(20px);
     opacity: 0;
   }
 
   .modal-close {
     position: absolute;
-    top: 16px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #666;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    font-size: 20px;
+    color: var(--text-muted);
     cursor: pointer;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
   }
 
   .modal-close:hover {
-    color: #333;
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
   }
 
   #modalTitle {
-    margin: 0 0 24px 0;
-    color: #333;
-    font-family: 'Arimo', sans-serif;
+    margin: 0 0 var(--space-xl) 0;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
     font-size: 24px;
+    font-weight: 600;
   }
 
   .details-stack {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-sm);
   }
 
   .detail-item {
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    padding: 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    transition: all var(--transition-fast);
+  }
+
+  .detail-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
   }
 
   .detail-item p {
     margin: 0;
-    color: #333;
-    font-size: 12px;
-    font-family: 'Arimo', sans-serif;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .detail-item strong {
+    color: var(--text-primary);
+    font-weight: 600;
   }
 
   .tabs {
     display: flex;
-    gap: 8px;
-    border-bottom: 2px solid #e9ecef;
-    margin-bottom: 24px;
+    gap: var(--space-xs);
+    border-bottom: 1px solid var(--border-primary);
+    margin-bottom: var(--space-xl);
   }
 
   .tab-btn {
     background: none;
     border: none;
-    padding: 12px 20px;
+    padding: var(--space-md) var(--space-lg);
     cursor: pointer;
-    color: #666;
+    color: var(--text-muted);
     font-size: 14px;
-    font-family: 'Arimo', sans-serif;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
     border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.2s;
+    margin-bottom: -1px;
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
   }
 
   .tab-btn:hover {
-    color: #183054;
+    color: var(--silver-light);
+    background: var(--bg-hover);
   }
 
   .tab-btn.active {
-    color: #183054;
-    border-bottom-color: #183054;
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+    background: var(--accent-bg);
     font-weight: 600;
   }
 
@@ -273,11 +357,18 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
   }
 
   :global(.entity-item) {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    padding: 12px;
-    margin-bottom: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+    transition: all var(--transition-fast);
+  }
+
+  :global(.entity-item:hover) {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    transform: translateY(-1px);
   }
 
   :global(.entity-info) {
@@ -285,30 +376,31 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
   }
 
   :global(.entity-info h4) {
-    margin: 0 0 4px 0;
-    color: #333;
-    font-size: 14px;
-    font-family: 'Arimo', sans-serif;
+    margin: 0 0 var(--space-xs) 0;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
   }
 
   :global(.entity-info p) {
-    margin: 0 0 8px 0;
-    color: #666;
-    font-size: 12px;
-    font-family: 'Arimo', sans-serif;
+    margin: 0 0 var(--space-xs) 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
   }
 
   :global(.entity-link) {
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color var(--transition-fast);
   }
 
   :global(.entity-link:hover) {
-    background: #e9ecef;
+    background: var(--bg-hover);
   }
 
   :global(.entity-link h4) {
-    color: #183054;
+    color: var(--accent-primary);
     text-decoration: underline;
   }
 </style>
@@ -316,9 +408,14 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('revendaModal');
+    const importModal = document.getElementById('importModal');
     const confirmModal = document.getElementById('confirmModal');
     const detailsModal = document.getElementById('detailsModal');
+    const perfilDetailsModal = document.getElementById('perfilDetailsModal');
+    const contatoDetailsModal = document.getElementById('contatoDetailsModal');
+    const organizacaoDetailsModal = document.getElementById('organizacaoDetailsModal');
     const addBtn = document.getElementById('addRevendaBtn');
+    const importBtn = document.getElementById('importRevendaBtn');
     const form = document.getElementById('revendaForm');
     const modalTitle = modal.querySelector('.modal-title');
     const saveBtn = modal.querySelector('.btn-save');
@@ -351,6 +448,12 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
       modal.style.display = 'flex';
       modal.offsetHeight;
       modal.classList.add('show');
+    });
+
+    importBtn.addEventListener('click', () => {
+      importModal.style.display = 'flex';
+      importModal.offsetHeight;
+      importModal.classList.add('show');
     });
 
     document.addEventListener('click', (e) => {
@@ -394,6 +497,27 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
         setTimeout(() => {
           detailsModal.classList.remove('show', 'closing');
           detailsModal.style.display = 'none';
+        }, 300);
+      }
+      if (e.target.matches('[data-close-perfil-details]')) {
+        perfilDetailsModal.classList.add('closing');
+        setTimeout(() => {
+          perfilDetailsModal.classList.remove('show', 'closing');
+          perfilDetailsModal.style.display = 'none';
+        }, 300);
+      }
+      if (e.target.matches('[data-close-contato-details]')) {
+        contatoDetailsModal.classList.add('closing');
+        setTimeout(() => {
+          contatoDetailsModal.classList.remove('show', 'closing');
+          contatoDetailsModal.style.display = 'none';
+        }, 300);
+      }
+      if (e.target.matches('[data-close-organizacao-details]')) {
+        organizacaoDetailsModal.classList.add('closing');
+        setTimeout(() => {
+          organizacaoDetailsModal.classList.remove('show', 'closing');
+          organizacaoDetailsModal.style.display = 'none';
         }, 300);
       }
     });
@@ -484,6 +608,19 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
       }
     });
 
+    // Event listeners para fechar modais clicando fora
+    [perfilDetailsModal, contatoDetailsModal, organizacaoDetailsModal].forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.add('closing');
+          setTimeout(() => {
+            modal.classList.remove('show', 'closing');
+            modal.style.display = 'none';
+          }, 300);
+        }
+      });
+    });
+
     async function showDetails(id) {
       try {
         currentRevendaId = id;
@@ -569,16 +706,84 @@ const { data: revendas, pagination } = await fetchPaginatedData('revenda-cloud',
       }
     }
 
-    function openEntityDetails(type, id) {
-      const urls = {
-        perfil_cloud: `/perfil-cloud?view=${id}`,
-        contato_cloud: `/contato-cloud?view=${id}`,
-        organizacao_cloud: `/organizacao-cloud?view=${id}`
-      };
-      
-      if (urls[type]) {
-        window.open(urls[type], '_blank');
+    async function openEntityDetails(type, id) {
+      try {
+        switch(type) {
+          case 'perfil_cloud':
+            await showPerfilDetails(id);
+            break;
+          case 'contato_cloud':
+            await showContatoDetails(id);
+            break;
+          case 'organizacao_cloud':
+            await showOrganizacaoDetails(id);
+            break;
+        }
+      } catch (error) {
+        console.error('Erro ao carregar detalhes:', error);
+        alert('Erro ao carregar detalhes');
       }
+    }
+
+    async function showPerfilDetails(id) {
+      const response = await fetch(`http://localhost:3000/api/perfil-cloud/${id}`);
+      const perfil = await response.json();
+      
+      const revendaResponse = await fetch(`http://localhost:3000/api/revenda-cloud/${perfil.revendacloud_id}`);
+      const revenda = await revendaResponse.json();
+      
+      document.getElementById('perfilModalTitle').textContent = `Detalhes - ${perfil.nome}`;
+      document.getElementById('perfilNomeText').innerHTML = `<p><strong>Nome:</strong> ${perfil.nome}</p>`;
+      document.getElementById('perfilRevendaText').innerHTML = `<p><strong>Revenda:</strong> ${revenda.nome_fantasia || 'N/A'}</p>`;
+      
+      perfilDetailsModal.style.display = 'flex';
+      perfilDetailsModal.offsetHeight;
+      perfilDetailsModal.classList.add('show');
+    }
+
+    async function showContatoDetails(id) {
+      const response = await fetch(`http://localhost:3000/api/contato-cloud/${id}`);
+      const contato = await response.json();
+      
+      const [revendaResponse, perfilResponse] = await Promise.all([
+        fetch(`http://localhost:3000/api/revenda-cloud/${contato.revendacloud_id}`),
+        fetch(`http://localhost:3000/api/perfil-cloud/${contato.perfil_id}`)
+      ]);
+      
+      const revenda = await revendaResponse.json();
+      const perfil = await perfilResponse.json();
+      
+      document.getElementById('contatoModalTitle').textContent = `Detalhes - ${contato.nome}`;
+      document.getElementById('contatoNomeText').innerHTML = `<p><strong>Nome:</strong> ${contato.nome}</p>`;
+      document.getElementById('contatoEmailText').innerHTML = `<p><strong>Email:</strong> ${contato.email}</p>`;
+      document.getElementById('contatoRevendaText').innerHTML = `<p><strong>Revenda:</strong> ${revenda.nome_fantasia || 'N/A'}</p>`;
+      document.getElementById('contatoPerfilText').innerHTML = `<p><strong>Perfil:</strong> ${perfil.nome || 'N/A'}</p>`;
+      
+      contatoDetailsModal.style.display = 'flex';
+      contatoDetailsModal.offsetHeight;
+      contatoDetailsModal.classList.add('show');
+    }
+
+    async function showOrganizacaoDetails(id) {
+      const response = await fetch(`http://localhost:3000/api/organizacao-cloud/${id}`);
+      const org = await response.json();
+      
+      const revendaResponse = await fetch(`http://localhost:3000/api/revenda-cloud/${org.revenda_id}`);
+      const revenda = await revendaResponse.json();
+      
+      document.getElementById('organizacaoModalTitle').textContent = `Detalhes - ${org.nome_fantasia}`;
+      document.getElementById('orgNomeFantasiaText').innerHTML = `<p><strong>Nome Fantasia:</strong> ${org.nome_fantasia}</p>`;
+      document.getElementById('orgRazaoSocialText').innerHTML = `<p><strong>Razão Social:</strong> ${org.razao_social}</p>`;
+      document.getElementById('orgCnpjText').innerHTML = `<p><strong>CNPJ:</strong> ${org.cnpj || 'N/A'}</p>`;
+      document.getElementById('orgTelefoneText').innerHTML = `<p><strong>Telefone:</strong> ${org.telefone || 'N/A'}</p>`;
+      document.getElementById('orgEmailText').innerHTML = `<p><strong>Email:</strong> ${org.email || 'N/A'}</p>`;
+      document.getElementById('orgCepText').innerHTML = `<p><strong>CEP:</strong> ${org.cep || 'N/A'}</p>`;
+      document.getElementById('orgCidadeText').innerHTML = `<p><strong>Cidade:</strong> ${org.cidade || 'N/A'}</p>`;
+      document.getElementById('orgRevendaText').innerHTML = `<p><strong>Revenda:</strong> ${revenda.nome_fantasia || 'N/A'}</p>`;
+      
+      organizacaoDetailsModal.style.display = 'flex';
+      organizacaoDetailsModal.offsetHeight;
+      organizacaoDetailsModal.classList.add('show');
     }
 
     form.addEventListener('submit', async (e) => {

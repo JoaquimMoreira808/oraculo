@@ -7,9 +7,9 @@
 		<link rel="icon" href="/favicon.ico" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Bubbler+One&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto+Slab:wght@100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Zalando+Sans+SemiExpanded:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 		<meta name="generator" content={Astro.generator} />
-		<title>Placeholder</title>
+		<title>Omni-Data</title>
 	</head>
 	<body>
 		<slot />
@@ -17,32 +17,337 @@
 </html>
 
 <style>
+	:root {
+		/* Modern Dark Theme - Inspired by n8n & AbacatePay */
+		--bg-primary: #0a0a0a;
+		--bg-secondary: #111111;
+		--bg-tertiary: #1a1a1a;
+		--bg-elevated: #1f1f1f;
+		--bg-hover: #252525;
+		--bg-card: #161616;
+		--bg-input: #1a1a1a;
+		--bg-modal: #141414;
+		
+		/* Text Colors */
+		--text-primary: #ffffff;
+		--text-secondary: #e5e5e5;
+		--text-muted: #a3a3a3;
+		--text-disabled: #737373;
+		--text-placeholder: #666666;
+		
+		/* Blue Accent - Keeping the existing blue */
+		--accent-primary: #3b82f6;
+		--accent-hover: #2563eb;
+		--accent-light: #60a5fa;
+		--accent-dark: #1d4ed8;
+		--accent-bg: rgba(59, 130, 246, 0.1);
+		--accent-border: rgba(59, 130, 246, 0.2);
+		
+		/* Silver/Platinum Accent - For titles and elegant elements */
+		--silver-primary: #c0c0c0;
+		--silver-light: #e8e8e8;
+		--silver-dark: #a8a8a8;
+		--silver-muted: #909090;
+		--gradient-silver: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+		--gradient-silver-dark: linear-gradient(135deg, #e8e8e8 0%, #c0c0c0 50%, #a8a8a8 100%);
+		
+		/* Status Colors */
+		--success: #22c55e;
+		--success-bg: rgba(34, 197, 94, 0.1);
+		--warning: #f59e0b;
+		--warning-bg: rgba(245, 158, 11, 0.1);
+		--error: #ef4444;
+		--error-bg: rgba(239, 68, 68, 0.1);
+		--info: #06b6d4;
+		--info-bg: rgba(6, 182, 212, 0.1);
+		
+		/* Borders */
+		--border-primary: #2a2a2a;
+		--border-secondary: #333333;
+		--border-focus: var(--accent-primary);
+		--border-hover: #404040;
+		--border-silver: var(--silver-muted);
+		
+		/* Shadows - Enhanced for dark theme */
+		--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+		--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+		--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+		--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8);
+		--shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
+		--shadow-silver: 0 0 20px rgba(192, 192, 192, 0.1);
+		
+		/* Gradients */
+		--gradient-primary: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-dark) 100%);
+		--gradient-card: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+		--gradient-hover: linear-gradient(135deg, var(--bg-hover) 0%, var(--bg-elevated) 100%);
+		
+		/* Animations */
+		--table-animation: tableEnter 0.4s ease-out;
+		--transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+		--transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		--transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+		
+		/* Spacing */
+		--space-xs: 0.25rem;
+		--space-sm: 0.5rem;
+		--space-md: 1rem;
+		--space-lg: 1.5rem;
+		--space-xl: 2rem;
+		--space-2xl: 3rem;
+		
+		/* Border Radius */
+		--radius-sm: 0.375rem;
+		--radius-md: 0.5rem;
+		--radius-lg: 0.75rem;
+		--radius-xl: 1rem;
+		--radius-2xl: 1.5rem;
+	}
+
 	html,
 	body {
 		margin: 0;
+		padding: 0;
 		width: 100%;
 		height: 100%;
-		background-color: #f2f1e4;
-		background-image: 
-			linear-gradient(rgba(230, 228, 215, 0.3) 3px, transparent 3px),
-			linear-gradient(90deg, rgba(230, 228, 215, 0.3) 3px, transparent 3px);
-		background-size: 60px 60px;
-		font-family: 'Arimo', sans-serif;
+		background: var(--bg-primary);
+		color: var(--text-primary);
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+		font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+		line-height: 1.5;
 	}
 
-	:root {
-		--table-animation: tableEnter 0.4s ease-out;
+	* {
+		box-sizing: border-box;
 	}
 
+	/* Modern animations */
 	@keyframes tableEnter {
 		from {
 			opacity: 0;
-			transform: translateY(10px);
+			transform: translateY(20px) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
 		}
 		to {
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateX(-24px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	@keyframes glow {
+		0%, 100% {
+			box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+		}
+		50% {
+			box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+		}
+	}
+
+	/* Modern scrollbar styling */
+	::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: var(--bg-secondary);
+		border-radius: 4px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: var(--border-secondary);
+		border-radius: 4px;
+		transition: background var(--transition-fast);
+		border: 1px solid var(--bg-secondary);
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: var(--text-muted);
+	}
+
+	::-webkit-scrollbar-corner {
+		background: var(--bg-secondary);
+	}
+
+	/* Scrollbar para elementos específicos */
+	.custom-scrollbar::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-track {
+		background: var(--bg-elevated);
+		border-radius: 3px;
+		margin: 2px;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb {
+		background: var(--border-primary);
+		border-radius: 3px;
+		transition: all var(--transition-fast);
+		border: none;
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: var(--accent-primary);
+		box-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
+	}
+
+	.custom-scrollbar::-webkit-scrollbar-corner {
+		background: var(--bg-elevated);
+	}
+
+	/* Scrollbar para modais */
+	.modal-scrollbar::-webkit-scrollbar {
+		width: 4px;
+		height: 4px;
+	}
+
+	.modal-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+		border-radius: 2px;
+	}
+
+	.modal-scrollbar::-webkit-scrollbar-thumb {
+		background: var(--text-disabled);
+		border-radius: 2px;
+		transition: all var(--transition-fast);
+		opacity: 0.6;
+	}
+
+	.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: var(--text-muted);
+		opacity: 1;
+	}
+
+	/* Scrollbar para tabelas */
+	.table-scrollbar::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	.table-scrollbar::-webkit-scrollbar-track {
+		background: var(--bg-card);
+		border-radius: 3px;
+	}
+
+	.table-scrollbar::-webkit-scrollbar-thumb {
+		background: var(--border-secondary);
+		border-radius: 3px;
+		transition: all var(--transition-fast);
+	}
+
+	.table-scrollbar::-webkit-scrollbar-thumb:hover {
+		background: var(--silver-muted);
+	}
+
+	/* Firefox scrollbar */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--border-secondary) var(--bg-secondary);
+	}
+
+	.custom-scrollbar {
+		scrollbar-width: thin;
+		scrollbar-color: var(--border-primary) var(--bg-elevated);
+	}
+
+	.modal-scrollbar {
+		scrollbar-width: thin;
+		scrollbar-color: var(--text-disabled) transparent;
+	}
+
+	.table-scrollbar {
+		scrollbar-width: thin;
+		scrollbar-color: var(--border-secondary) var(--bg-card);
+	}
+
+	/* Selection styling */
+	::selection {
+		background: var(--accent-bg);
+		color: var(--accent-light);
+	}
+
+	/* Focus styles */
+	:focus-visible {
+		outline: 2px solid var(--accent-primary);
+		outline-offset: 2px;
+		border-radius: var(--radius-sm);
+	}
+
+	/* Autocomplete styling - Remove blue background */
+	input:-webkit-autofill,
+	input:-webkit-autofill:hover,
+	input:-webkit-autofill:focus,
+	input:-webkit-autofill:active,
+	textarea:-webkit-autofill,
+	textarea:-webkit-autofill:hover,
+	textarea:-webkit-autofill:focus,
+	textarea:-webkit-autofill:active,
+	select:-webkit-autofill,
+	select:-webkit-autofill:hover,
+	select:-webkit-autofill:focus,
+	select:-webkit-autofill:active {
+		-webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+		-webkit-text-fill-color: var(--text-primary) !important;
+		border-color: var(--border-primary) !important;
+		background-color: var(--bg-input) !important;
+		color: var(--text-primary) !important;
+		transition: background-color 5000s ease-in-out 0s !important;
+		background-image: none !important;
+		background-clip: padding-box !important;
+	}
+
+	/* Autocomplete para campos em foco */
+	input:-webkit-autofill:focus,
+	textarea:-webkit-autofill:focus,
+	select:-webkit-autofill:focus {
+		-webkit-box-shadow: 0 0 0 1000px var(--bg-elevated) inset !important;
+		border-color: var(--accent-primary) !important;
+		box-shadow: 0 0 0 3px var(--accent-bg), 0 0 0 1000px var(--bg-elevated) inset !important;
+	}
+
+	/* Force override para todos os estados */
+	input[autocomplete]:not([autocomplete="off"]),
+	textarea[autocomplete]:not([autocomplete="off"]),
+	select[autocomplete]:not([autocomplete="off"]) {
+		background-color: var(--bg-input) !important;
+		color: var(--text-primary) !important;
+	}
+
+	/* Webkit autofill delay trick */
+	@keyframes autofill {
+		0%, 100% {
+			background: var(--bg-input);
+			color: var(--text-primary);
+		}
+	}
+
+	input:-webkit-autofill {
+		animation: autofill 0s forwards;
 	}
 </style>
 

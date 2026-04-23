@@ -7,7 +7,7 @@ const { itemId } = Astro.props;
 ---
 
 <button class="delete-btn" title="Excluir" data-item-id={itemId}>
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
@@ -15,26 +15,30 @@ const { itemId } = Astro.props;
 
 <style>
   .delete-btn {
-    background: rgba(245, 66, 87, 0.1);
-    color: #f54257;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 8px;
+    background: var(--bg-elevated);
+    color: var(--error);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
   }
 
   .delete-btn svg {
     display: block;
+    transition: transform var(--transition-fast);
   }
 
   .delete-btn:hover {
-    background: rgba(245, 66, 87, 0.2);
+    background: var(--error-bg);
+    border-color: var(--error);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
   }
 
   .delete-btn:hover svg {
@@ -43,12 +47,12 @@ const { itemId } = Astro.props;
 
   @keyframes shake {
     0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
+    25% { transform: rotate(-6deg); }
     50% { transform: rotate(0deg); }
-    75% { transform: rotate(10deg); }
+    75% { transform: rotate(6deg); }
   }
 
   .delete-btn:active {
-    transform: scale(0.95);
+    transform: translateY(0);
   }
 </style>

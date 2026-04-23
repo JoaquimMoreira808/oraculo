@@ -50,6 +50,8 @@ export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options
     const baseUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
     const url = `${baseUrl}/api/${endpoint}?page=${page}&limit=${limit}`;
     
+    console.log('Fazendo fetch para:', url);
+    
     const response = await fetch(url, options);
     
     if (!response.ok) {
@@ -58,6 +60,7 @@ export async function fetchPaginatedData(endpoint, page = 1, limit = 10, options
     }
     
     const result = await response.json();
+    console.log('Resultado da API:', { dataLength: result.data?.length, pagination: result.pagination });
     
     // Se tem estrutura de paginação, retorna os dados e paginação
     if (result && typeof result === 'object' && result.data) {

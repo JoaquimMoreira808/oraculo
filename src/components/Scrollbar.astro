@@ -1,0 +1,85 @@
+---
+interface Props {
+  type?: 'default' | 'modal' | 'table' | 'custom';
+  className?: string;
+}
+
+const { type = 'default', className = '' } = Astro.props;
+
+const scrollbarClass = {
+  default: '',
+  modal: 'modal-scrollbar',
+  table: 'table-scrollbar', 
+  custom: 'custom-scrollbar'
+}[type];
+---
+
+<div class={`scrollbar-container ${scrollbarClass} ${className}`}>
+  <slot />
+</div>
+
+<style>
+  .scrollbar-container {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+  }
+
+  /* Scrollbar padrão aprimorada */
+  .scrollbar-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+  }
+
+  .scrollbar-container::-webkit-scrollbar-thumb {
+    background: var(--border-secondary);
+    border-radius: 4px;
+    transition: all var(--transition-fast);
+    border: 1px solid var(--bg-secondary);
+  }
+
+  .scrollbar-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+
+  .scrollbar-container::-webkit-scrollbar-corner {
+    background: var(--bg-secondary);
+  }
+
+  /* Variações específicas já definidas no Layout.astro */
+</style>
+
+<script>
+  // Adicionar suporte para scroll suave
+  document.addEventListener('DOMContentLoaded', () => {
+    const scrollContainers = document.querySelectorAll('.scrollbar-container');
+    
+    scrollContainers.forEach(container => {
+      // Adicionar classe para indicar que tem scroll
+      const hasVerticalScroll = container.scrollHeight > container.clientHeight;
+      const hasHorizontalScroll = container.scrollWidth > container.clientWidth;
+      
+      if (hasVerticalScroll) {
+        container.classList.add('has-vertical-scroll');
+      }
+      
+      if (hasHorizontalScroll) {
+        container.classList.add('has-horizontal-scroll');
+      }
+      
+      // Scroll suave com wheel
+      container.addEventListener('wheel', (e) => {
+        if (e.shiftKey) {
+          // Scroll horizontal com Shift + Wheel
+          e.preventDefault();
+          container.scrollLeft += e.deltaY;
+        }
+      });
+    });
+  });
+</script>

@@ -1,44 +1,66 @@
 ---
 import TopBar from '../components/TopBar.astro';
 import Layout from '../layouts/Layout.astro';
-import SearchResults from '../components/SearchResults.astro';
 ---
 
 <Layout>
 	<TopBar />
 	<main class="search-container">
 		<div class="search-wrapper">
-			<h1 class="search-title">Placeholder</h1>
-			<div class="search-input-container">
-				<input 
-					id="search-input"
-					type="text" 
-					placeholder="Pesquisar..." 
-					class="search-input"
-				/>
-				<div class="search-badge" id="search-badge">
-					<span id="badge-text">empresas</span>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7 10l5 5 5-5z" fill="currentColor"/>
-					</svg>
-				</div>
-				<div id="filter-dropdown" class="filter-dropdown hidden">
-					<div class="filter-option" data-type="all">Todas</div>
-					<div class="filter-option" data-type="empresa">Empresas</div>
-					<div class="filter-option" data-type="contato">Contatos</div>
-					<div class="filter-option" data-type="maquina">Máquinas</div>
-					<div class="filter-option" data-type="equipamento">Equipamentos</div>
-					<div class="filter-option" data-type="linha">Linhas</div>
-					<div class="filter-option" data-type="chatbot">Chatbots</div>
+			<div class="hero-section">
+				<h1 class="search-title">Omni-Data</h1>
+				<p class="search-subtitle">Sistema inteligente de inventário e gestão</p>
+			</div>
+			
+			<div class="search-box">
+				<div class="search-input-container">
+					<div class="search-icon">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19S2 15.194 2 10.5 5.806 2 10.5 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</div>
+					<input 
+						id="search-input"
+						type="text" 
+						placeholder="Pesquisar no Omni-Data..." 
+						class="search-input"
+						autocomplete="off"
+					/>
+					<div class="search-actions">
+						<select id="search-filter" class="search-filter">
+							<option value="all">Todas</option>
+							<option value="dedicado">Dedicado</option>
+							<option value="cloud">Cloud</option>
+						</select>
+						<button class="clear-search" id="clear-search" title="Limpar busca">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+					</div>
 				</div>
 			</div>
-			<div id="loading" class="loading hidden">Buscando...</div>
+			
+			<div id="loading" class="loading hidden">
+				<div class="loading-spinner"></div>
+				<span>Buscando resultados...</span>
+			</div>
 			
 			<div id="search-results-card" class="search-results-card hidden">
 				<div id="results-content" class="results-content"></div>
 			</div>
 		</div>
+		
 		<div id="related-cards" class="related-cards hidden"></div>
+		
+		<!-- Modal de Registros Relacionados -->
+		<div id="relatedModal" class="modal">
+			<div class="modal-content">
+				<button class="modal-close" data-close-related>&times;</button>
+				<h2 id="relatedModalTitle">Registros Relacionados</h2>
+				<div id="relatedModalContent" class="related-modal-content"></div>
+			</div>
+		</div>
 	</main>
 </Layout>
 
@@ -46,177 +68,369 @@ import SearchResults from '../components/SearchResults.astro';
 	.search-container {
 		display: flex;
 		justify-content: center;
-		padding: 40px 20px;
-		min-height: calc(100vh - 80px);
+		padding: var(--space-2xl) var(--space-lg);
+		min-height: calc(100vh - 72px);
 		position: relative;
+		background: var(--bg-primary);
 	}
 
 	.search-wrapper {
 		width: 100%;
-		max-width: 700px;
+		max-width: 800px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		gap: var(--space-xl);
 	}
 
-	.related-cards {
-		position: absolute;
-		left: calc(50% + 370px);
-		top: 104px;
-		width: 300px;
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-		max-height: 80vh;
-		overflow-y: auto;
+	.hero-section {
+		text-align: center;
+		margin-bottom: var(--space-lg);
 	}
 
 	.search-title {
-		font-size: 32px;
-		margin: 0 0 24px 0;
-		color: #333;
+		font-size: 48px;
+		margin: 0 0 var(--space-md) 0;
+		color: var(--text-primary);
+		font-weight: 700;
+		font-family: 'Inter', sans-serif;
+		background: var(--gradient-silver-dark);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		text-shadow: 0 0 40px rgba(192, 192, 192, 0.2);
+		animation: fadeIn 0.8s ease-out;
+	}
+
+	.search-subtitle {
+		font-size: 18px;
+		color: var(--text-muted);
+		margin: 0;
 		font-weight: 400;
-		font-family: 'Roboto Mono', monospace;
+		animation: fadeIn 1s ease-out 0.2s both;
+	}
+
+	.search-box {
 		width: 100%;
-		text-align: center;
+		position: relative;
+		animation: fadeIn 1.2s ease-out 0.4s both;
 	}
 
 	.search-input-container {
 		position: relative;
 		width: 100%;
+		display: flex;
+		align-items: center;
+		background: var(--bg-input);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-2xl);
+		box-shadow: var(--shadow-lg);
+		transition: all var(--transition-normal);
+		overflow: hidden;
+	}
+
+	.search-input-container:focus-within {
+		border-color: var(--accent-primary);
+		box-shadow: var(--shadow-glow);
+		transform: translateY(-2px);
+		background: var(--bg-elevated);
+	}
+
+	.search-icon {
+		padding: 0 var(--space-lg);
+		color: var(--text-muted);
+		display: flex;
+		align-items: center;
+		transition: color var(--transition-fast);
+	}
+
+	.search-input-container:focus-within .search-icon {
+		color: var(--accent-primary);
 	}
 
 	.search-input {
-		width: 100%;
-		padding: 16px 120px 16px 24px;
+		flex: 1;
+		padding: var(--space-lg) 0;
 		font-size: 18px;
-		border: 2px solid #ddd;
-		border-radius: 50px;
+		border: none;
 		outline: none;
-		transition: border-color 0.3s ease;
-		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-		box-sizing: border-box;
-		background: white;
-	}
-
-	.search-badge {
-		position: absolute;
-		right: 12px;
-		top: 50%;
-		transform: translateY(-50%);
-		background: #d9d9d9;
-		color: #616161;
-		padding: 7px 18px;
-		border-radius: 18px;
-		font-size: 17px;
-		font-weight: 600;
-		font-family: 'Arimo', sans-serif;
-		box-sizing: border-box;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 5px;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
-		z-index: 10;
-	}
-
-	.search-badge:hover {
-		background: #c9c9c9;
-	}
-
-	.filter-dropdown {
-		position: absolute;
-		right: 12px;
-		top: calc(100% + 8px);
-		background: white;
-		border: 1px solid #ddd;
-		border-radius: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		z-index: 20;
-		min-width: 140px;
-	}
-
-	.filter-option {
-		padding: 12px 16px;
-		cursor: pointer;
-		font-size: 14px;
-		font-family: 'Arimo', sans-serif;
-		transition: background-color 0.2s ease;
-		border-bottom: 1px solid #f0f0f0;
-	}
-
-	.filter-option:last-child {
-		border-bottom: none;
-	}
-
-	.filter-option:hover {
-		background: #f5f5f5;
-	}
-
-	.filter-option:first-child {
-		border-radius: 8px 8px 0 0;
-	}
-
-	.filter-option:last-child {
-		border-radius: 0 0 8px 8px;
-	}
-
-	.search-input:focus {
-		border-color: #007acc;
-		box-shadow: 0 2px 15px rgba(0, 122, 204, 0.2);
+		background: transparent;
+		color: var(--text-primary);
+		font-family: 'Inter', sans-serif;
+		font-weight: 400;
 	}
 
 	.search-input::placeholder {
-		color: #999;
+		color: var(--text-placeholder);
+		font-weight: 400;
+	}
+
+	.search-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		padding-right: var(--space-md);
+	}
+
+	.search-filter {
+		padding: var(--space-sm) var(--space-md);
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-md);
+		color: var(--text-secondary);
+		font-size: 14px;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		font-family: inherit;
+		outline: none;
+		appearance: auto;
+	}
+
+	.search-filter:hover {
+		background: var(--bg-hover);
+		border-color: var(--silver-muted);
+		color: var(--silver-light);
+	}
+
+	.clear-search {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-md);
+		color: var(--text-muted);
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		opacity: 0;
+		visibility: hidden;
+		transform: scale(0.8);
+	}
+
+	.clear-search.visible {
+		opacity: 1;
+		visibility: visible;
+		transform: scale(1);
+	}
+
+	.clear-search:hover {
+		background: var(--error-bg);
+		border-color: var(--error);
+		color: var(--error);
+		transform: scale(1.05);
+	}
+
+
+	/* Modal de Registros Relacionados */
+	.modal {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.8);
+		backdrop-filter: blur(8px);
+		z-index: 3000;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		transition: opacity var(--transition-normal);
+	}
+
+	.modal.show {
+		display: flex;
+		opacity: 1;
+	}
+
+	.modal.closing {
+		opacity: 0;
+	}
+
+	.modal-content {
+		background: var(--bg-modal);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-xl);
+		padding: var(--space-2xl);
+		max-width: 700px;
+		width: 90%;
+		position: relative;
+		max-height: 85vh;
+		overflow-y: auto;
+		transform: scale(0.95) translateY(20px);
+		opacity: 0;
+		transition: all var(--transition-normal);
+		box-shadow: var(--shadow-xl);
+	}
+
+	.modal.show .modal-content {
+		transform: scale(1) translateY(0);
+		opacity: 1;
+	}
+
+	.modal.closing .modal-content {
+		transform: scale(0.95) translateY(20px);
+		opacity: 0;
+	}
+
+	.modal-close {
+		position: absolute;
+		top: var(--space-lg);
+		right: var(--space-lg);
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-md);
+		font-size: 20px;
+		color: var(--text-muted);
+		cursor: pointer;
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all var(--transition-fast);
+	}
+
+	.modal-close:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+		border-color: var(--border-hover);
+	}
+
+	#relatedModalTitle {
+		margin: 0 0 var(--space-xl) 0;
+		color: var(--text-primary);
+		font-family: 'Inter', sans-serif;
+		font-size: 24px;
+		font-weight: 600;
+	}
+
+	.related-modal-content {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-lg);
+	}
+
+	:global(.modal-related-card) {
+		background: var(--bg-elevated);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-lg);
+		padding: var(--space-lg);
+		transition: all var(--transition-fast);
+	}
+
+	:global(.modal-related-card:hover) {
+		background: var(--bg-hover);
+		border-color: var(--border-hover);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	:global(.modal-related-card h4) {
+		margin: 0 0 var(--space-md) 0;
+		color: var(--text-primary);
+		font-size: 18px;
+		font-weight: 600;
+		font-family: 'Inter', sans-serif;
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
+	:global(.modal-related-card h4::before) {
+		content: '🔗';
+		font-size: 16px;
+		opacity: 0.7;
+	}
+
+	:global(.modal-related-item) {
+		padding: var(--space-md);
+		background: var(--bg-card);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-md);
+		margin-bottom: var(--space-sm);
+		transition: all var(--transition-fast);
+	}
+
+	:global(.modal-related-item:hover) {
+		background: var(--bg-hover);
+		border-color: var(--accent-primary);
+		transform: translateX(4px);
+	}
+
+	:global(.modal-related-item:last-child) {
+		margin-bottom: 0;
+	}
+
+	:global(.modal-related-name) {
+		color: var(--text-primary);
+		font-size: 15px;
+		font-weight: 500;
+		font-family: 'Inter', sans-serif;
+	}
+
+	:global(.modal-related-link) {
+		text-decoration: none;
+		display: block;
+		transition: all var(--transition-fast);
+	}
+
+	:global(.modal-related-link:hover .modal-related-name) {
+		color: var(--accent-primary);
 	}
 
 	.loading {
-		margin-top: 16px;
-		color: #007acc;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-md);
+		margin-top: var(--space-xl);
+		color: var(--accent-primary);
 		font-size: 14px;
-		text-align: center;
+		font-weight: 500;
+		animation: fadeIn 0.3s ease-out;
+	}
+
+	.loading-spinner {
+		width: 20px;
+		height: 20px;
+		border: 2px solid var(--border-primary);
+		border-top: 2px solid var(--accent-primary);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
 	}
 
 	.hidden {
-		display: none;
-	}
-
-	@media (max-width: 1200px) {
-		.related-cards {
-			position: static;
-			left: auto;
-			top: auto;
-			width: 100%;
-			max-width: 700px;
-			max-height: 50vh;
-			margin: 16px auto 0;
-		}
-		
-		.search-container {
-			flex-direction: column;
-			align-items: center;
-		}
+		display: none !important;
 	}
 
 	.search-results-card {
 		width: 100%;
-		margin-top: 24px;
-		background: white;
-		border-radius: 16px;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-		border: 1px solid #e8eaed;
-		max-height: 70vh;
+		margin-top: var(--space-xl);
+		background: var(--bg-card);
+		border: 1px solid var(--border-primary);
+		border-radius: var(--radius-xl);
+		box-shadow: var(--shadow-xl);
+		max-height: 75vh;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
-		animation: slideDown 0.3s ease-out;
+		animation: slideDown 0.4s ease-out;
+		backdrop-filter: blur(10px);
 	}
 
-	@keyframes slideDown {
+	@keyframes fadeIn {
 		from {
 			opacity: 0;
-			transform: translateY(-20px);
+			transform: translateY(12px);
 		}
 		to {
 			opacity: 1;
@@ -224,13 +438,24 @@ import SearchResults from '../components/SearchResults.astro';
 		}
 	}
 
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateX(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
 	:global(.card-header) {
 		display: flex;
-		justify-content: center;
+		justify-content: space-between;
 		align-items: center;
-		padding: 20px 24px;
-		border-bottom: 1px solid #e8eaed;
-		background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+		padding: var(--space-xl);
+		border-bottom: 1px solid var(--border-primary);
+		background: var(--bg-elevated);
 		position: relative;
 	}
 
@@ -241,14 +466,15 @@ import SearchResults from '../components/SearchResults.astro';
 		left: 0;
 		right: 0;
 		height: 3px;
-		background: linear-gradient(90deg, #007acc, #0099ff, #007acc);
+		background: var(--gradient-primary);
 	}
 
 	:global(.card-header h3) {
 		margin: 0;
-		color: #1a1a1a;
-		font-size: 18px;
+		color: var(--text-primary);
+		font-size: 20px;
 		font-weight: 600;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.close-btn {
@@ -275,83 +501,95 @@ import SearchResults from '../components/SearchResults.astro';
 		overflow-y: auto;
 		max-height: 60vh;
 		padding: 0;
-		background: #fafbfc;
+		background: var(--bg-card);
 	}
 
+	/* Aplicar scrollbar personalizada para resultados */
 	.results-content::-webkit-scrollbar {
 		width: 6px;
 	}
 
 	.results-content::-webkit-scrollbar-track {
-		background: #f1f1f1;
+		background: var(--bg-elevated);
+		border-radius: 3px;
+		margin: 2px;
 	}
 
 	.results-content::-webkit-scrollbar-thumb {
-		background: #c1c1c1;
+		background: var(--border-primary);
 		border-radius: 3px;
+		transition: all var(--transition-fast);
+	}
+
+	.results-content::-webkit-scrollbar-thumb:hover {
+		background: var(--accent-primary);
+		box-shadow: 0 0 6px rgba(59, 130, 246, 0.3);
 	}
 
 	:global(.results-count) {
-		padding: 12px 24px;
-		background: #f8f9fa;
-		color: #999;
-		font-size: 12px;
-		font-weight: 400;
-		border-top: 1px solid #e8eaed;
+		padding: var(--space-md) var(--space-xl);
+		background: var(--bg-elevated);
+		color: var(--text-muted);
+		font-size: 13px;
+		font-weight: 500;
+		border-top: 1px solid var(--border-primary);
 		text-align: center;
+		font-family: 'Inter', sans-serif;
 	}
 
 	:global(.no-results) {
 		text-align: center;
-		padding: 12px 20px;
-		color: #5f6368;
-		font-size: 18px;
-		font-family: 'Arimo', sans-serif;
-		background: white;
-		border-radius: 12px;
-		margin: 20px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-		border: 1px solid #e8eaed;
+		padding: var(--space-2xl);
+		color: var(--text-muted);
+		font-size: 16px;
+		font-family: 'Inter', sans-serif;
+		background: var(--bg-card);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-md);
+	}
+
+	:global(.no-results::before) {
+		content: '🔍';
+		font-size: 48px;
+		opacity: 0.5;
 	}
 
 	:global(.no-results p) {
 		margin: 0;
 		font-weight: 500;
-	}
-
-	.empresa-result {
-		padding: 20px;
-		border-bottom: 3px solid rgba(230, 228, 215, 0.3);
-		background: white;
-		border-left: none;
-		font-family: 'Arimo', sans-serif;
-	}
-
-	.empresa-result:last-child {
-		border-bottom: none;
-	}
-
-	.record-name {
-		margin: 0;
-		color: #333333;
-		font-size: 18px;
-		font-weight: 600;
-		font-family: 'Arimo', sans-serif;
-	}
-
-	.record-type {
-		color: #666666;
-		font-size: 14px;
-		font-weight: 500;
-		font-family: 'Arimo', sans-serif;
+		color: var(--text-secondary);
 	}
 
 	:global(.empresa-result) {
-		padding: 20px;
-		border-bottom: 3px solid rgba(230, 228, 215, 0.3);
-		background: white;
-		border-left: none;
-		font-family: 'Arimo', sans-serif;
+		padding: var(--space-xl);
+		border-bottom: 1px solid var(--border-primary);
+		background: var(--bg-card);
+		transition: all var(--transition-fast);
+		position: relative;
+		overflow: hidden;
+	}
+
+	:global(.empresa-result::before) {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: transparent;
+		transition: background var(--transition-fast);
+	}
+
+	:global(.empresa-result:hover) {
+		background: var(--bg-hover);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	:global(.empresa-result:hover::before) {
+		background: var(--accent-primary);
 	}
 
 	:global(.empresa-result:last-child) {
@@ -359,115 +597,99 @@ import SearchResults from '../components/SearchResults.astro';
 	}
 
 	:global(.record-name) {
-		margin: 0;
-		color: #333333;
+		margin: 0 0 var(--space-xs) 0;
+		color: var(--text-primary);
 		font-size: 18px;
 		font-weight: 600;
-		font-family: 'Arimo', sans-serif;
+		font-family: 'Inter', sans-serif;
+		transition: color var(--transition-fast);
 	}
 
 	:global(.record-type) {
-		color: #666666;
+		color: var(--text-muted);
 		font-size: 14px;
 		font-weight: 500;
-		font-family: 'Arimo', sans-serif;
+		font-family: 'Inter', sans-serif;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		padding: var(--space-xs) var(--space-sm);
+		background: var(--bg-elevated);
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--border-primary);
 	}
 
 	:global(.record-link) {
 		text-decoration: none;
 		display: block;
-		margin-bottom: 8px;
-		transition: opacity 0.2s;
+		margin-bottom: var(--space-md);
+		transition: all var(--transition-fast);
 		position: relative;
 		z-index: 1;
 		pointer-events: auto;
 	}
 
-	:global(.record-link:hover) {
-		opacity: 0.8;
-	}
-
-	.expand-btn {
-		background: #183054;
-		color: #ffffff;
-		border: none;
-		padding: 6px 12px;
-		border-radius: 6px;
-		font-size: 12px;
-		font-weight: 500;
-		cursor: pointer;
-		margin-top: 8px;
-		transition: background-color 0.2s;
-		font-family: 'Arimo', sans-serif;
-	}
-
-	.expand-btn:hover {
-		background: #0f1f35;
-	}
-
-	:global(.related-card) {
-		background: white;
-		border-radius: 6px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		padding: 16px;
-		border: 3px solid rgba(230, 228, 215, 0.3);
-		font-family: 'Arimo', sans-serif;
-	}
-
-	:global(.related-card h4) {
-		margin: 0 0 12px 0;
-		color: #333333;
-		font-size: 16px;
-		font-weight: 600;
-	}
-
-	:global(.related-item) {
-		padding: 8px 12px;
-		background: #f2f1e4;
-		border-radius: 6px;
-		border: 2px solid rgba(230, 228, 215, 0.3);
-		margin-bottom: 8px;
-	}
-
-	:global(.related-item:last-child) {
-		margin-bottom: 0;
-	}
-
-	:global(.related-name) {
-		color: #333333;
-		font-size: 14px;
-		font-weight: 600;
-		font-family: 'Arimo', sans-serif;
-	}
-
-	:global(.related-link) {
-		text-decoration: none;
-		display: block;
-		transition: opacity 0.2s;
-	}
-
-	:global(.related-link:hover) {
-		opacity: 0.8;
+	:global(.record-link:hover .record-name) {
+		color: var(--accent-primary);
 	}
 
 	:global(.expand-btn) {
-		background: #183054;
-		color: #ffffff;
-		border: none;
-		padding: 6px 12px;
-		border-radius: 6px;
-		font-size: 12px;
+		background: var(--bg-elevated);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-primary);
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-md);
+		font-size: 13px;
 		font-weight: 500;
 		cursor: pointer;
-		margin-top: 8px;
-		transition: background-color 0.2s;
-		font-family: 'Arimo', sans-serif;
+		transition: all var(--transition-fast);
+		font-family: 'Inter', sans-serif;
 		position: relative;
 		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+	}
+
+	:global(.expand-btn::after) {
+		content: '→';
+		transition: transform var(--transition-fast);
 	}
 
 	:global(.expand-btn:hover) {
-		background: #0f1f35;
+		background: var(--accent-bg);
+		border-color: var(--accent-primary);
+		color: var(--accent-primary);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	:global(.expand-btn:hover::after) {
+		transform: translateX(2px);
+	}
+
+	/* Responsividade */
+	@media (max-width: 768px) {
+		.search-container {
+			padding: var(--space-lg) var(--space-md);
+		}
+		
+		.search-title {
+			font-size: 36px;
+		}
+		
+		.search-subtitle {
+			font-size: 16px;
+		}
+		
+		.search-input {
+			font-size: 16px;
+			padding: var(--space-md) 0;
+		}
+		
+		.search-actions {
+			gap: var(--space-xs);
+		}
 	}
 </style>
 
@@ -479,13 +701,15 @@ import SearchResults from '../components/SearchResults.astro';
 	const resultsCard = document.getElementById('search-results-card');
 	const resultsContent = document.getElementById('results-content');
 	const relatedCards = document.getElementById('related-cards');
-	const searchBadge = document.getElementById('search-badge');
-	const filterDropdown = document.getElementById('filter-dropdown');
-	const badgeText = document.getElementById('badge-text');
+	const relatedModal = document.getElementById('relatedModal');
+	const relatedModalContent = document.getElementById('relatedModalContent');
+	const relatedModalTitle = document.getElementById('relatedModalTitle');
+	const searchFilter = document.getElementById('search-filter');
+	const clearSearch = document.getElementById('clear-search');
 
 	let searchTimeout;
 	let currentResults = [];
-	let currentFilter = 'empresa';
+	let currentFilter = 'all';
 
 	const tableLabels = {
 		empresa: 'Empresa',
@@ -498,7 +722,12 @@ import SearchResults from '../components/SearchResults.astro';
 		rede: 'Rede',
 		linha: 'Linha',
 		senha: 'Senha',
-		tronco: 'Tronco'
+		tronco: 'Tronco',
+		// Cloud types
+		revenda_cloud: 'Revenda Cloud',
+		perfil_cloud: 'Perfil Cloud',
+		contato_cloud: 'Contato Cloud',
+		organizacao_cloud: 'Organização Cloud'
 	};
 
 	const fieldLabels = {
@@ -529,7 +758,12 @@ import SearchResults from '../components/SearchResults.astro';
 			equipamento: `/equipamentos?view=${id}`,
 			contato: `/pessoas?view=${id}`,
 			chatbot: `/chatbots?view=${id}`,
-			linha: `/linhas?view=${id}`
+			linha: `/linhas?view=${id}`,
+			// Cloud routes
+			revenda_cloud: `/revenda-cloud?view=${id}`,
+			perfil_cloud: `/perfil-cloud?view=${id}`,
+			contato_cloud: `/contato-cloud?view=${id}`,
+			organizacao_cloud: `/organizacao-cloud?view=${id}`
 		};
 		return routes[type] || '#';
 	}
@@ -587,81 +821,116 @@ import SearchResults from '../components/SearchResults.astro';
 		resultsContent.innerHTML = '';
 		relatedCards.classList.add('hidden');
 		relatedCards.innerHTML = '';
+		closeRelatedModal();
+	}
+
+	function closeRelatedModal() {
+		if (relatedModal.classList.contains('show')) {
+			relatedModal.classList.add('closing');
+			setTimeout(() => {
+				relatedModal.classList.remove('show', 'closing');
+				relatedModal.style.display = 'none';
+				relatedModalContent.innerHTML = '';
+			}, 300);
+		}
 	}
 
 	async function expandRecord(type, id, index) {
 		try {
 			const relatedRecords = await fetchRelatedRecords(type, id);
-			showRelatedCards(relatedRecords, currentResults[index]);
+			showRelatedModal(relatedRecords, currentResults[index]);
 		} catch (error) {
 			console.error('Erro ao buscar relacionados:', error);
 		}
 	}
 
-	function showRelatedCards(records, originalRecord) {
+	function showRelatedModal(records, originalRecord) {
+		const displayName = originalRecord.type === 'chatbot' ? originalRecord.subtitle : originalRecord.title;
+		relatedModalTitle.textContent = `Relacionados - ${displayName}`;
+		
 		if (records.length === 0) {
-			relatedCards.innerHTML = '<div class="related-card"><h4>Nenhum registro relacionado encontrado</h4></div>';
-			relatedCards.classList.remove('hidden');
-			return;
-		}
-
-		const groupedRecords = records.reduce((acc, record) => {
-			if (!acc[record.type]) acc[record.type] = [];
-			acc[record.type].push(record);
-			return acc;
-		}, {});
-
-		let html = '';
-		Object.entries(groupedRecords).forEach(([type, items]) => {
-			html += `
-				<div class="related-card">
-					<h4>${tableLabels[type] || type} (${items.length})</h4>
-					${items.map(item => {
-						const detailUrl = getDetailUrl(item.type, item.id);
-						return `
-							<div class="related-item">
-								<a href="${detailUrl}" class="related-link">
-									<div class="related-name">${item.nome}</div>
-								</a>
-							</div>
-						`;
-					}).join('')}
+			relatedModalContent.innerHTML = `
+				<div style="text-align: center; padding: var(--space-2xl); color: var(--text-muted);">
+					<div style="font-size: 48px; margin-bottom: var(--space-md); opacity: 0.5;">🔍</div>
+					<p style="margin: 0; font-size: 16px; font-weight: 500;">Nada por aqui...</p>
+					<p style="margin: var(--space-xs) 0 0 0; font-size: 14px; opacity: 0.8;">Nenhum registro relacionado encontrado</p>
 				</div>
 			`;
-		});
+		} else {
+			const groupedRecords = records.reduce((acc, record) => {
+				if (!acc[record.type]) acc[record.type] = [];
+				acc[record.type].push(record);
+				return acc;
+			}, {});
 
-		relatedCards.innerHTML = html;
-		relatedCards.classList.remove('hidden');
+			let html = '';
+			Object.entries(groupedRecords).forEach(([type, items]) => {
+				html += `
+					<div class="modal-related-card">
+						<h4>${tableLabels[type] || type} (${items.length})</h4>
+						${items.map(item => {
+							const detailUrl = getDetailUrl(item.type, item.id);
+							return `
+								<div class="modal-related-item">
+									<a href="${detailUrl}" class="modal-related-link">
+										<div class="modal-related-name">${item.nome}</div>
+									</a>
+								</div>
+							`;
+						}).join('')}
+					</div>
+				`;
+			});
+			relatedModalContent.innerHTML = html;
+		}
+		
+		relatedModal.style.display = 'flex';
+		relatedModal.offsetHeight;
+		relatedModal.classList.add('show');
 	}
 
 	// Tornar função global para uso no onclick
 	window.expandRecord = expandRecord;
 
-	// Event listeners para o dropdown de filtro
-	searchBadge.addEventListener('click', (e) => {
-		e.stopPropagation();
-		filterDropdown.classList.toggle('hidden');
+	// Filtro de categoria
+	searchFilter?.addEventListener('change', () => {
+		currentFilter = searchFilter.value;
+		if (searchInput.value.trim()) performSearch(searchInput.value.trim());
 	});
 
-	// Fechar dropdown ao clicar fora
-	document.addEventListener('click', () => {
-		filterDropdown.classList.add('hidden');
+	// Event listeners para o modal de relacionados
+	document.addEventListener('click', (e) => {
+		if (e.target.matches('[data-close-related]')) {
+			closeRelatedModal();
+		}
 	});
 
-	// Seleção de filtro
-	document.querySelectorAll('.filter-option').forEach(option => {
-		option.addEventListener('click', (e) => {
-			e.stopPropagation();
-			const selectedType = e.target.dataset.type;
-			currentFilter = selectedType;
-			badgeText.textContent = e.target.textContent.toLowerCase();
-			filterDropdown.classList.add('hidden');
-			
-			// Se há uma busca ativa, refaz a busca com o novo filtro
-			if (searchInput.value.trim()) {
-				performSearch(searchInput.value.trim());
+	// Fechar modal ao clicar fora
+	relatedModal?.addEventListener('click', (e) => {
+		if (e.target === relatedModal) {
+			closeRelatedModal();
+		}
+	});
+
+	// Fechar modal com ESC
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			if (relatedModal.classList.contains('show')) {
+				closeRelatedModal();
+			} else {
+				closeResults();
 			}
-		});
+		}
+	});
+
+
+
+	// Botão de limpar busca
+	clearSearch?.addEventListener('click', () => {
+		searchInput.value = '';
+		closeResults();
+		clearSearch.classList.remove('visible');
+		searchInput.focus();
 	});
 
 
@@ -686,6 +955,13 @@ import SearchResults from '../components/SearchResults.astro';
 
 	searchInput.addEventListener('input', (e) => {
 		const query = e.target.value;
+		
+		// Mostrar/ocultar botão de limpar
+		if (query.trim()) {
+			clearSearch?.classList.add('visible');
+		} else {
+			clearSearch?.classList.remove('visible');
+		}
 		
 		if (searchTimeout) {
 			clearTimeout(searchTimeout);
@@ -713,7 +989,11 @@ import SearchResults from '../components/SearchResults.astro';
 
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape') {
-			closeResults();
+			if (relatedModal.classList.contains('show')) {
+				closeRelatedModal();
+			} else {
+				closeResults();
+			}
 		}
 	});
 

@@ -42,12 +42,13 @@ const {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
     z-index: 2000;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-normal);
   }
 
   .modal.show {
@@ -60,74 +61,103 @@ const {
   }
 
   .modal-content {
-    background: white;
-    border-radius: 8px;
-    padding: 32px;
-    max-width: 400px;
+    background: var(--bg-modal);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    max-width: 480px;
     width: 90%;
     position: relative;
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(20px);
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: all var(--transition-normal);
     text-align: center;
+    box-shadow: var(--shadow-xl);
   }
 
   .modal.show .modal-content {
-    transform: scale(1);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 
   .modal.closing .modal-content {
-    transform: scale(0.9);
+    transform: scale(0.95) translateY(20px);
     opacity: 0;
   }
 
   .confirm-icon {
-    margin-bottom: 16px;
+    margin-bottom: var(--space-lg);
+    display: flex;
+    justify-content: center;
+  }
+
+  .confirm-icon svg {
+    width: 56px;
+    height: 56px;
   }
 
   h3 {
-    margin: 0 0 12px 0;
-    color: #333;
-    font-family: 'Arimo', sans-serif;
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-primary);
+    font-family: inherit;
     font-size: 20px;
+    font-weight: 600;
   }
 
   .warning-text {
-    color: #999;
+    color: var(--text-muted);
     font-weight: 400;
-    font-size: 13px;
-    margin-bottom: 24px;
+    font-size: 14px;
+    margin-bottom: var(--space-xl);
+    line-height: 1.5;
   }
 
   .confirm-actions {
     display: flex;
-    gap: 12px;
+    gap: var(--space-sm);
     justify-content: center;
   }
 
   .btn-cancel {
-    background: #f5f5f5;
-    color: #666;
-    border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-lg);
     cursor: pointer;
-    font-family: 'Arimo', sans-serif;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+  }
+
+  .btn-cancel:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    color: var(--text-primary);
   }
 
   .btn-danger {
-    background: #f54257;
+    background: var(--error);
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-lg);
     cursor: pointer;
-    font-family: 'Arimo', sans-serif;
-    transition: background-color 0.2s;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
   }
 
   .btn-danger:hover {
-    background: #e03850;
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-danger:active {
+    transform: translateY(0);
   }
 </style>
